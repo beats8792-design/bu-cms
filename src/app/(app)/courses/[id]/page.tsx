@@ -17,6 +17,12 @@ import { MaterialUploader, MaterialVisibilityToggle } from "@/modules/materials/
 import { listAssignmentsByCourse } from "@/modules/assignments/service";
 import { deadlineState, formatDeadline } from "@/modules/assignments/schema";
 import { AssignmentForm, DeleteAssignmentButton } from "@/modules/assignments/components/assignment-form";
+import { courseDigest, listSessions, myAttendance } from "@/modules/attendance/service";
+import { dhakaToday, lowAttendanceMessage } from "@/modules/attendance/schema";
+import {
+  OpenSessionForm,
+  ThresholdForm,
+} from "@/modules/attendance/components/attendance-forms";
 
 export const instant = false;
 
@@ -72,6 +78,9 @@ export default async function CoursePage({ params }: Props) {
     canManage || myRow?.status === "enrolled" || user.role === "alumni"
       ? await listAssignmentsByCourse(session, course.id)
       : [];
+
+  const rosterSections = [...new Set(roster.map((r) => r.section))];
+  const isStudentishEnrolled = (isStudent || isCr) && myRow?.status === "enrolled";
 
   const teachers = isAdmin
     ? (await listUsers(session, { role: "teacher" })).users.map((t) => ({
@@ -221,6 +230,20 @@ export default async function CoursePage({ params }: Props) {
         </section>
       ) : null}
 
+      {/* Attendance (UCM-F15…F17) */}
+      <section className="mt-8">
+        <h2 className="font-display text-lg font-semibold">Attendance</h2>
+        {canManage ? (
+          <AttendanceManager courseId={course.id} sections={rosterSections} />
+        ) : isStudentishEnrolled ? (
+          <MyAttendance courseId={course.id} userId={user.id} />
+        ) : (
+          <p className="mt-2 text-sm text-muted">
+            {isStudent || isCr ? "Enroll to track your attendance." : "Attendance appears once sessions are held."}
+          </p>
+        )}
+      </section>
+
       {/* Syllabus */}
       <section className="mt-8">
         <h2 className="font-display text-lg font-semibold">Syllabus</h2>
@@ -289,4 +312,145 @@ export default async function CoursePage({ params }: Props) {
 
 function DAY(day: number): string {
   return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][day] ?? "";
+}
+
+/* --------------------------------------------------- attendance (Phase 5) */
+
+/** Manager panel: open sessions, per-student digest, threshold override. */
+async function AttendanceManager({
+  courseId,
+  sections,
+}: {
+  courseId: string;
+  sections: string[];
+}) {
+  const { user } = await appGate();
+  const session = { user };
+  const [digest, sessions] = await Promise.all([courseDigest(session, courseId), listSessions(session, courseId)]);
+
+  return (
+    <div className="mt-2 flex flex-col gap-4">
+      <OpenSessionForm courseId={courseId} sections={sections.length > 0 ? sections : ["A"]} today={dhakaToday()} />
+
+      <div>
+        <h3 className="text-sm font-semibold text-muted">Sessions</h3>
+        {sessions.length === 0 ? (
+          <p className="mt-1 text-sm text-muted">No sessions yet — open the first one above.</p>
+        ) : (
+          <ul className="mt-1 flex flex-col gap-1 text-sm">
+            {sessions.slice(0, 10).map((s) => (
+              <li key={s.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-surface p-2">
+                <Link href={`/courses/${courseId}/attendance/${s.id}`} className="font-medium hover:underline">
+                  {s.date} · section {s.section}
+                </Link>
+                {s.topic ? <span className="text-xs text-muted">{s.topic}</span> : null}
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    s.status === "open" ? "bg-warn-soft text-warn" : "bg-primary-soft text-primary-hover"
+                  }`}
+                >
+                  {s.status}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-muted">Attendance digest (low first)</h3>
+        <p className="mt-1 text-xs text-muted">
+          Threshold {digest.threshold}% · present + late / applicable sessions
+        </p>
+        {digest.rows.length === 0 ? (
+          <p className="mt-1 text-sm text-muted">No students enrolled yet.</p>
+        ) : (
+          <table className="mt-2 w-full border-collapse text-sm">
+            <caption className="sr-only">Attendance percentage per student</caption>
+            <thead>
+              <tr className="border-b border-border text-left text-muted">
+                <th className="py-2 pr-3 font-medium">Student</th>
+                <th className="py-2 pr-3 font-medium">Sec</th>
+                <th className="py-2 pr-3 font-medium">Attended</th>
+                <th className="py-2 pr-3 font-medium">%</th>
+                <th className="py-2 font-medium">Warning</th>
+              </tr>
+            </thead>
+            <tbody>
+              {digest.rows.map((r) => (
+                <tr key={r.userId} className="border-b border-border hover:bg-primary-soft">
+                  <td className="py-2 pr-3">
+                    {r.name}
+                    {r.studentId ? <span className="num ml-2 text-xs text-muted">{r.studentId}</span> : null}
+                  </td>
+                  <td className="py-2 pr-3">{r.section}</td>
+                  <td className="num py-2 pr-3">
+                    {r.stats.possible === 0 ? "—" : `${r.stats.attended}/${r.stats.possible}`}
+                  </td>
+                  <td className="num py-2 pr-3">{r.stats.pct === null ? "—" : `${r.stats.pct}%`}</td>
+                  <td className="py-2">
+                    {r.warning ? (
+                      <span className="rounded-full bg-danger-soft px-2 py-0.5 text-xs font-medium text-danger">
+                        below {digest.threshold}%
+                      </span>
+                    ) : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <ThresholdForm courseId={courseId} current={digest.threshold} />
+    </div>
+  );
+}
+
+/** Student/CR panel: own percentage + recent records (UCM-F16/F17). */
+async function MyAttendance({ courseId, userId }: { courseId: string; userId: string }) {
+  const { user } = await appGate();
+  const session = { user };
+  const att = await myAttendance(session, courseId, userId);
+  const warning = lowAttendanceMessage(att.stats.pct, att.threshold);
+
+  return (
+    <div className="mt-2">
+      <p className="flex flex-wrap items-center gap-2 text-sm">
+        <span
+          className={`num rounded-full px-3 py-1 text-xs font-medium ${
+            warning ? "bg-danger-soft text-danger" : att.stats.pct === null ? "bg-primary-soft text-primary-hover" : "bg-primary-soft text-primary-hover"
+          }`}
+        >
+          {att.stats.pct === null ? "No sessions yet" : `${att.stats.pct}%`}
+        </span>
+        {att.stats.pct !== null ? (
+          <span className="num text-muted">
+            {att.stats.attended}/{att.stats.possible} sessions (present + late)
+          </span>
+        ) : null}
+      </p>
+      {warning ? (
+        <p role="alert" className="mt-2 rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
+          {warning}
+        </p>
+      ) : null}
+      {att.sessions.length > 0 ? (
+        <ul className="mt-2 flex flex-col gap-1 text-sm">
+          {att.sessions.slice(0, 8).map((s) => {
+            const rec = att.records.find((r) => r.sessionId === s.id);
+            return (
+              <li key={s.id} className="flex flex-wrap items-center gap-2">
+                <Link href={`/courses/${courseId}/attendance/${s.id}`} className="hover:underline">
+                  {s.date}
+                  {s.topic ? ` — ${s.topic}` : ""}
+                </Link>
+                <span className="text-xs text-muted">{rec ? rec.status : "not marked"}</span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
+    </div>
+  );
 }
