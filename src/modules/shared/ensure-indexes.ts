@@ -26,6 +26,7 @@ export const DOMAIN_COLLECTIONS = [
   "study_groups",
   "resource_library",
   "activity_logs",
+  "calendar_events",
 ] as const;
 
 export async function ensureIndexes(db: Db): Promise<void> {
@@ -33,6 +34,19 @@ export async function ensureIndexes(db: Db): Promise<void> {
     const exists = await db.listCollections({ name }).hasNext();
     if (!exists) await db.createCollection(name);
   }
+
+  /* departments: code is the human-facing identifier */
+  await db.collection("departments").createIndex({ code: 1 }, { unique: true });
+  /* courses: unique per (code, semesterId) — same course runs again next semester */
+  await db.collection("courses").createIndex({ code: 1, semesterId: 1 }, { unique: true });
+  await db.collection("courses").createIndex({ departmentId: 1, semesterId: 1 });
+  await db.collection("courses").createIndex({ teacherIds: 1 });
+  /* enrollments: one (course, user) row ever — dropped rows are reused */
+  await db.collection("enrollments").createIndex({ courseId: 1, userId: 1 }, { unique: true });
+  await db.collection("enrollments").createIndex({ userId: 1, status: 1 });
+  /* calendar events: chronological lookups + scope lookups */
+  await db.collection("calendar_events").createIndex({ date: 1 });
+  await db.collection("calendar_events").createIndex({ "scope.type": 1, "scope.refId": 1 });
 
   await db.collection("meta").updateOne(
     { _id: "schema" } as never,
