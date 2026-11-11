@@ -47,6 +47,10 @@ export async function ensureIndexes(db: Db): Promise<void> {
   /* calendar events: chronological lookups + scope lookups */
   await db.collection("calendar_events").createIndex({ date: 1 });
   await db.collection("calendar_events").createIndex({ "scope.type": 1, "scope.refId": 1 });
+  /* assignments + submissions (Phase 4) */
+  await db.collection("assignments").createIndex({ courseId: 1, deadlineAt: 1 });
+  await db.collection("submissions").createIndex({ assignmentId: 1, userId: 1 }, { unique: true });
+  await db.collection("submissions").createIndex({ userId: 1 });
 
   await db.collection("meta").updateOne(
     { _id: "schema" } as never,

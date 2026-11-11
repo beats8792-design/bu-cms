@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { appGate } from "@/modules/auth/session";
 import { getCourse, teacherNamesByIds } from "@/modules/academic/courses";
@@ -13,6 +14,9 @@ import { DropButton, EnrollButton, ManualEnrollForm } from "@/modules/academic/c
 import { listMaterials } from "@/modules/materials/service";
 import { formatBytes } from "@/modules/materials/schema";
 import { MaterialUploader, MaterialVisibilityToggle } from "@/modules/materials/components/material-uploader";
+import { listAssignmentsByCourse } from "@/modules/assignments/service";
+import { deadlineState, formatDeadline } from "@/modules/assignments/schema";
+import { AssignmentForm, DeleteAssignmentButton } from "@/modules/assignments/components/assignment-form";
 
 export const instant = false;
 
@@ -64,6 +68,10 @@ export default async function CoursePage({ params }: Props) {
     list.push(m);
     materialsByTopicKey.set(m.topic, list);
   }
+  const assignments =
+    canManage || myRow?.status === "enrolled" || user.role === "alumni"
+      ? await listAssignmentsByCourse(session, course.id)
+      : [];
 
   const teachers = isAdmin
     ? (await listUsers(session, { role: "teacher" })).users.map((t) => ({
@@ -169,6 +177,49 @@ export default async function CoursePage({ params }: Props) {
           </div>
         ) : null}
       </section>
+
+      {/* Assignments (UCM-F10…F14) */}
+      {canManage || myRow?.status === "enrolled" || user.role === "alumni" ? (
+        <section className="mt-8">
+          <h2 className="font-display text-lg font-semibold">Assignments</h2>
+          {assignments.length === 0 ? (
+            <p className="mt-2 text-sm text-muted">
+              {canManage ? "No assignments yet — add the first one below." : "No assignments yet."}
+            </p>
+          ) : (
+            <ul className="mt-2 flex flex-col gap-1 text-sm">
+              {assignments.map((a) => {
+                const ds = deadlineState(a.deadline);
+                return (
+                  <li key={a.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-surface p-2">
+                    <Link href={`/courses/${course.id}/assignments/${a.id}`} className="font-medium hover:underline">
+                      {a.title}
+                    </Link>
+                    <span className="num text-xs text-muted">{a.points} pts</span>
+                    <span
+                      className={`num rounded-full px-2 py-0.5 text-xs font-medium ${
+                        ds === "closed" ? "bg-danger-soft text-danger" : ds === "due-soon" ? "bg-warn-soft text-warn" : "bg-primary-soft text-primary-hover"
+                      }`}
+                    >
+                      due {formatDeadline(a.deadline)}
+                    </span>
+                    {canManage ? (
+                      <span className="ml-auto flex items-center gap-3">
+                        <DeleteAssignmentButton assignmentId={a.id} courseId={course.id} />
+                      </span>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {canManage ? (
+            <div className="mt-4">
+              <AssignmentForm courseId={course.id} />
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       {/* Syllabus */}
       <section className="mt-8">

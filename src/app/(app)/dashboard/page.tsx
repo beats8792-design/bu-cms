@@ -1,21 +1,61 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { appGate } from "@/modules/auth/session";
+import { myCourseIds } from "@/modules/academic/enrollment";
+import { listDueAssignments } from "@/modules/assignments/service";
+import { deadlineState, formatDeadline, type Assignment } from "@/modules/assignments/schema";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-const MODULES: { name: string; phase: string; status: "ready" | "pending" }[] = [
-  { name: "Academics — courses & enrollment", phase: "Phase 2", status: "pending" },
-  { name: "Course materials", phase: "Phase 3", status: "pending" },
-  { name: "Assignments", phase: "Phase 4", status: "pending" },
-  { name: "Attendance", phase: "Phase 5", status: "pending" },
-  { name: "Marks & results", phase: "Phase 6", status: "pending" },
-  { name: "Announcements & CR", phase: "Phase 7", status: "pending" },
-  { name: "Collaboration", phase: "Phase 8", status: "pending" },
-  { name: "AI assistant", phase: "Phase 9", status: "pending" },
-  { name: "Admin analytics", phase: "Phase 10", status: "pending" },
-];
+export const instant = false;
 
-const PHASE1_FEATURES = ["Auth & roles", "Approval gating", "Profile", "Admin user management"];
+/** "Due soon" list (UCM-F13) for students/CRs across their courses. */
+async function DueSoon({ userId, role }: { userId: string; role: string }) {
+  if (role !== "student" && role !== "cr") return null;
+  const courseIds = await myCourseIds({ user: { id: userId, role } });
+  const due = await listDueAssignments({ user: { id: userId, role } }, courseIds);
+
+  if (due.length === 0) {
+    return (
+      <div className="mt-6">
+        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">Due soon</h2>
+        <p className="mt-2 text-sm text-muted">Nothing due — you are all caught up.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-6">
+      <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">Due soon</h2>
+      <ul className="mt-2 grid gap-3">
+        {due.map((a) => (
+          <DueRow key={a.id} assignment={a} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function DueRow({ assignment }: { assignment: Assignment }) {
+  const ds = deadlineState(assignment.deadline);
+  return (
+    <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface p-4">
+      <div>
+        <Link href={`/courses/${assignment.courseId}/assignments/${assignment.id}`} className="text-sm font-medium hover:underline">
+          {assignment.title}
+        </Link>
+        <p className="num text-xs text-muted">{formatDeadline(assignment.deadline)}</p>
+      </div>
+      <span
+        className={`num rounded-full px-3 py-1 text-xs font-medium ${
+          ds === "due-soon" ? "bg-warn-soft text-warn" : "bg-primary-soft text-primary-hover"
+        }`}
+      >
+        {assignment.points} pts
+      </span>
+    </li>
+  );
+}
 
 export default async function DashboardPage() {
   const { user } = await appGate();
@@ -30,35 +70,7 @@ export default async function DashboardPage() {
         {user.studentId ? ` · ID ${user.studentId}` : ""}) — approved and active.
       </p>
 
-      <div className="mt-6">
-        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">
-          Live in this phase
-        </h2>
-        <ul className="mt-2 flex flex-wrap gap-2">
-          {PHASE1_FEATURES.map((f) => (
-            <li key={f} className="rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary-hover">
-              {f}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="mt-6">
-        <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-muted">
-          Modules on the roadmap
-        </h2>
-        <ul className="mt-2 grid gap-3">
-          {MODULES.map((m) => (
-            <li
-              key={m.name}
-              className="flex items-center justify-between rounded-lg border border-border bg-surface p-4"
-            >
-              <span className="text-sm font-medium">{m.name}</span>
-              <span className="text-xs text-muted">{m.phase}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <DueSoon userId={user.id} role={user.role} />
     </div>
   );
 }

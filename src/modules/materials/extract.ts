@@ -15,15 +15,19 @@ export type ExtractionResult =
 
 const MAX_TEXT_CHARS = 300_000;
 
+type PdfParseFn = (buffer: Buffer) => Promise<{ text: string }>;
+
 // pdf-parse's index.js has a debug branch that runs when it is the entry
 // module; importing the lib file directly avoids it (ESM has no module.parent).
-import pdfParseLib from "pdf-parse/lib/pdf-parse.js";
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PdfParseFn = (buffer: Buffer, options?: any) => Promise<{ text: string }>;
-const pdfParse = pdfParseLib as unknown as PdfParseFn;
+// Loaded lazily so page prerender never pulls pdf.js into the build worker.
+async function loadPdfParse(): Promise<PdfParseFn> {
+  const mod = (await import("pdf-parse/lib/pdf-parse.js")) as { default: PdfParseFn };
+  return mod.default;
+}
 
 async function extractPdf(buffer: Buffer): Promise<ExtractionResult> {
   try {
+    const pdfParse = await loadPdfParse();
     const pdf = await pdfParse(buffer);
     const text = (pdf.text ?? "").trim();
     if (text.length < 20) {

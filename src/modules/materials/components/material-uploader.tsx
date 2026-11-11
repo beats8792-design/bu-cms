@@ -38,10 +38,10 @@ export function MaterialUploader({ courseId }: { courseId: string }) {
     setUploading(true);
     try {
       // 1) ask the server for a signature (also re-checks course-manager RBAC)
-      const signRes = await fetch("/api/materials/sign", {
+      const signRes = await fetch("/api/uploads/sign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courseId }),
+        body: JSON.stringify({ kind: "material", courseId }),
       });
       const signed = (await signRes.json()) as SignedUpload & { error?: string };
       if (!signRes.ok) throw new Error(signed.error ?? "Could not start the upload.");
