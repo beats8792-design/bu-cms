@@ -14,7 +14,7 @@ export function isRole(value: unknown): value is Role {
 }
 
 export interface SessionForAuth {
-  user?: { id: string; role?: string } | null;
+  user?: { id: string; role?: string | null } | null;
 }
 
 export function roleOf(session: SessionForAuth | null | undefined): Role | null {

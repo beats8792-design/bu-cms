@@ -1,34 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { authClient } from "@/modules/auth/auth-client";
+import { NAV_BY_ROLE } from "@/components/nav";
+import type { Role } from "@/modules/auth/rbac";
 
-/**
- * AppShell for signed-in areas (Phase 0 placeholder state).
- * Sidebar nav items are static until role gating lands in Phase 1;
- * paths/temporary nav labels live in NAV so they're easy to re-skin.
- */
-
-export interface NavItem {
-  href: string;
-  label: string;
+export interface AppShellProps {
+  children: React.ReactNode;
+  role: Role;
+  name: string;
+  email: string;
 }
 
-export const PLACEHOLDER_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/courses", label: "Courses" },
-  { href: "/schedule", label: "Schedule" },
-  { href: "/announcements", label: "Announcements" },
-];
-
-export function AppShell({ children }: { children: React.ReactNode }) {
+/**
+ * AppShell for signed-in areas (Brain/DESIGN.md §6). Nav comes from the
+ * role map; the admin chip appears only for admins.
+ */
+export function AppShell({ children, role, name, email }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  async function signOut() {
+    await authClient.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
+  const items = NAV_BY_ROLE[role] ?? NAV_BY_ROLE.student;
 
   const nav = (
     <nav aria-label="Main" className="flex flex-col gap-1 p-3">
-      {PLACEHOLDER_NAV.map((item) => {
+      {items.map((item) => {
         const active = pathname.startsWith(item.href);
         return (
           <Link
@@ -62,15 +67,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           >
             Menu
           </button>
-          <Link href="/" className="font-display text-base font-semibold text-primary">
+          <Link href="/dashboard" className="font-display text-base font-semibold text-primary">
             Jazbah UCMS
           </Link>
         </div>
-        <div className="flex items-center gap-3 text-sm text-muted">
-          <span aria-hidden>🔔</span>
-          <span className="rounded-full border border-border px-2.5 py-1 text-xs">
-            Sign-in arrives in Phase 1
+        <div className="flex items-center gap-3">
+          <span
+            className="hidden rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary-hover sm:inline"
+          >
+            {role}
           </span>
+          <span className="hidden text-sm text-muted md:inline" title={email}>
+            {name}
+          </span>
+          <button
+            type="button"
+            onClick={signOut}
+            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-primary-soft"
+          >
+            Sign out
+          </button>
         </div>
       </header>
 

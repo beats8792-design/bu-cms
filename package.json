@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:setup": "tsx scripts/db-setup.ts"
+    "db:setup": "tsx scripts/db-setup.ts",
+    "adm": "tsx scripts/create-admin.ts"
   },
   "type": "module",
   "dependencies": {
@@ -18,6 +19,7 @@
     "@tanstack/react-query": "^5.106.1",
     "better-auth": "^1.7.17",
     "cloudinary": "^2.11.0",
+    "dotenv": "^18.0.9",
     "mongodb": "^7.8.0",
     "next": "16.4.5",
     "react": "19.3.0",

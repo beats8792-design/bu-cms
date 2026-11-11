@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+// Standalone scripts exit the Next boot chain; load .env.local manually.
+config({ path: ".env.local" });
 import { createMongoClient } from "@/lib/db";
 import { ensureIndexes } from "@/modules/shared/ensure-indexes";
 
