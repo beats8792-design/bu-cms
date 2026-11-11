@@ -10,6 +10,9 @@ import { formatSlot, type Department, type Semester } from "@/modules/academic/s
 import { CourseForm } from "@/modules/academic/components/course-form";
 import { TeacherPicker } from "@/modules/academic/components/teacher-picker";
 import { DropButton, EnrollButton, ManualEnrollForm } from "@/modules/academic/components/enroll-buttons";
+import { listMaterials } from "@/modules/materials/service";
+import { formatBytes } from "@/modules/materials/schema";
+import { MaterialUploader, MaterialVisibilityToggle } from "@/modules/materials/components/material-uploader";
 
 export const instant = false;
 
@@ -54,6 +57,13 @@ export default async function CoursePage({ params }: Props) {
   const canManage = isAdmin || isTeacherOfCourse;
   const canSeeRoster = canManage || isCr;
   const roster = canSeeRoster ? await courseRoster(session, course.id) : [];
+  const materials = await listMaterials(session, course.id, { includeHidden: true });
+  const materialsByTopicKey = new Map<string, typeof materials>();
+  for (const m of materials) {
+    const list = materialsByTopicKey.get(m.topic) ?? [];
+    list.push(m);
+    materialsByTopicKey.set(m.topic, list);
+  }
 
   const teachers = isAdmin
     ? (await listUsers(session, { role: "teacher" })).users.map((t) => ({
@@ -109,6 +119,55 @@ export default async function CoursePage({ params }: Props) {
             ))}
           </ul>
         )}
+      </section>
+
+      {/* Materials (UCM-F8) */}
+      <section className="mt-8">
+        <h2 className="font-display text-lg font-semibold">Materials</h2>
+        {materials.length === 0 ? (
+          <p className="mt-2 text-sm text-muted">
+            {canManage ? "No materials yet — upload the first file below." : "No materials yet."}
+          </p>
+        ) : (
+          <div className="mt-2 flex flex-col gap-4">
+            {[...materialsByTopicKey.entries()].map(([topic, list]) => (
+              <div key={topic}>
+                <p className="text-sm font-semibold text-muted">{topic}</p>
+                <ul className="mt-1 flex flex-col gap-1">
+                  {list.map((m) => (
+                    <li
+                      key={m.id}
+                      className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-surface p-2 text-sm"
+                    >
+                      <a href={`/api/materials/${m.id}/download`} className="font-medium hover:underline">
+                        {m.title}
+                      </a>
+                      <span className="text-xs uppercase text-muted">.{m.fileType}</span>
+                      <span className="num text-xs text-muted">{formatBytes(m.size)}</span>
+                      <span className="num text-xs text-muted">
+                        {m.downloadCount} download{m.downloadCount === 1 ? "" : "s"}
+                      </span>
+                      {m.hidden ? <span className="text-xs text-warn">hidden</span> : null}
+                      {m.extraction.status !== "ok" && canManage ? (
+                        <span className="text-xs text-warn">{m.extraction.message}</span>
+                      ) : null}
+                      {canManage ? (
+                        <span className="ml-auto">
+                          <MaterialVisibilityToggle materialId={m.id} hidden={m.hidden} />
+                        </span>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+        {canManage ? (
+          <div className="mt-4">
+            <MaterialUploader courseId={course.id} />
+          </div>
+        ) : null}
       </section>
 
       {/* Syllabus */}
