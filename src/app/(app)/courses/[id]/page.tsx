@@ -138,6 +138,18 @@ export default async function CoursePage({ params }: Props) {
         )}
       </section>
 
+      {/* Marks & results link (UCM-F18…F24) */}
+      {canManage || isStudentishEnrolled ? (
+        <p className="mt-6">
+          <Link
+            href={`/courses/${course.id}/marks`}
+            className="rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary-soft"
+          >
+            {canManage ? "Marks & results — enter marks, publish" : "View my marks & results"}
+          </Link>
+        </p>
+      ) : null}
+
       {/* Materials (UCM-F8) */}
       <section className="mt-8">
         <h2 className="font-display text-lg font-semibold">Materials</h2>
