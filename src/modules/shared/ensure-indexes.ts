@@ -58,6 +58,17 @@ export async function ensureIndexes(db: Db): Promise<void> {
   /* marks & results (Phase 6) */
   await db.collection("assessment_schemas").createIndex({ courseId: 1 }, { unique: true });
   await db.collection("marks").createIndex({ courseId: 1, userId: 1, componentKey: 1 }, { unique: true });
+  /* notifications + announcements (Phase 7) */
+  await db.collection("notifications").createIndex({ userId: 1, createdAt: -1 });
+  await db.collection("notifications").createIndex({ userId: 1, read: 1 });
+  // Dedup guard for cron reminders: unique per (dedup, userId); regular
+  // notifications (no dedup field) are excluded via the partial filter.
+  await db.collection("notifications").createIndex(
+    { dedup: 1, userId: 1 },
+    { unique: true, partialFilterExpression: { dedup: { $exists: true, $type: "string" } } },
+  );
+  await db.collection("announcements").createIndex({ pinned: -1, createdAt: -1 });
+  await db.collection("announcements").createIndex({ scope: 1, refId: 1 });
 
   await db.collection("meta").updateOne(
     { _id: "schema" } as never,

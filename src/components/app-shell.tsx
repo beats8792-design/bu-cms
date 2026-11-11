@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/modules/auth/auth-client";
+import { NotificationBell } from "@/modules/notifications/components/notification-bell";
 import { NAV_BY_ROLE } from "@/components/nav";
 import type { Role } from "@/modules/auth/rbac";
 
@@ -72,6 +73,7 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
           </Link>
         </div>
         <div className="flex items-center gap-3">
+          <NotificationBell />
           <span
             className="hidden rounded-full bg-primary-soft px-2.5 py-1 text-xs font-medium text-primary-hover sm:inline"
           >

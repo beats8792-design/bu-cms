@@ -19,6 +19,7 @@ const OptionalEnv = z.object({
   GEMINI_API_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM: z.string().optional(),
+  CRON_SECRET: z.string().optional(),
 });
 
 export type OptionalServices = {

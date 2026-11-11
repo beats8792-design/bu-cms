@@ -12,6 +12,7 @@ const SHARED: NavItem[] = [
   { href: "/schedule", label: "Schedule" },
   { href: "/calendar", label: "Calendar" },
   { href: "/announcements", label: "Announcements" },
+  { href: "/notifications", label: "Notifications" },
   { href: "/profile", label: "Profile" },
 ];
 
@@ -22,6 +23,8 @@ const ADMIN_EXTRA: NavItem[] = [
   { href: "/admin/courses", label: "Admin · Courses" },
 ];
 
+const CR_EXTRA: NavItem[] = [{ href: "/cr", label: "CR dashboard" }];
+
 const ALUMNI: NavItem[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/announcements", label: "Announcements" },
@@ -30,10 +33,7 @@ const ALUMNI: NavItem[] = [
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   admin: [...SHARED, ...ADMIN_EXTRA],
   teacher: SHARED,
-  cr: SHARED,
+  cr: [...SHARED, ...CR_EXTRA],
   student: SHARED,
   alumni: ALUMNI,
 };
-
-/** Placeholder pages that exist yet; used to avoid dead links in Phase 0/1. */
-export const COMING_SOON_HREFS = ["/announcements"];

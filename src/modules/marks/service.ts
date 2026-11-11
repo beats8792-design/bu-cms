@@ -381,7 +381,8 @@ export async function setPublished(
       throw new AppError("CONFLICT", "Set up the assessment plan before publishing.");
     }
   }
-  await (await getDb()).collection("assessment_schemas").updateOne(
+  const db = (await getDb());
+  await db.collection("assessment_schemas").updateOne(
     { courseId },
     {
       $set: {
@@ -395,4 +396,15 @@ export async function setPublished(
     },
     { upsert: true },
   );
+
+  // UCM-F25: publishing notifies the course's students (fan-out via
+  // notifications; emails follow the Phase 7 Resend wiring if enabled).
+  if (published) {
+    const enrolled = (await db
+      .collection("enrollments")
+      .find({ courseId, status: "enrolled" }, { projection: { userId: 1 } })
+      .toArray()) as unknown as Array<{ userId: string }>;
+    const { notifyResultsPublished } = await import("@/modules/notifications/service");
+    await notifyResultsPublished(courseId, course.code, enrolled.map((e) => e.userId));
+  }
 }
