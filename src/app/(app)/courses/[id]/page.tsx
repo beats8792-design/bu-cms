@@ -153,6 +153,21 @@ export default async function CoursePage({ params }: Props) {
         </p>
       ) : null}
 
+      {/* AI tools (UCM-A1–A3) */}
+      {canManage || isStudentishEnrolled ? (
+        <p className="mt-3 flex flex-wrap gap-3 text-sm">
+          <Link href={`/courses/${course.id}/assistant`} className="rounded-md border border-border px-3 py-2 hover:bg-primary-soft">
+            🤖 AI Course Assistant
+          </Link>
+          <Link href={`/courses/${course.id}/summaries`} className="rounded-md border border-border px-3 py-2 hover:bg-primary-soft">
+            AI summaries
+          </Link>
+          <Link href={`/courses/${course.id}/quiz`} className="rounded-md border border-border px-3 py-2 hover:bg-primary-soft">
+            Quiz drafts
+          </Link>
+        </p>
+      ) : null}
+
       {/* Materials (UCM-F8) */}
       <section className="mt-8">
         <h2 className="font-display text-lg font-semibold">Materials</h2>

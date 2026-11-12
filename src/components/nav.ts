@@ -29,6 +29,9 @@ const CR_EXTRA: NavItem[] = [{ href: "/cr", label: "CR dashboard" }];
 /** Study groups are for students/CRs and alumni seniors (canJoinGroup). */
 const GROUPS: NavItem[] = [{ href: "/groups", label: "Groups" }];
 
+/** AI study planner (UCM-A4) — students and CRs. */
+const STUDY: NavItem[] = [{ href: "/study-plan", label: "Study plan" }];
+
 const ALUMNI: NavItem[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/library", label: "Library" },
@@ -39,7 +42,7 @@ const ALUMNI: NavItem[] = [
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   admin: [...SHARED, ...ADMIN_EXTRA],
   teacher: SHARED,
-  cr: [...SHARED, ...GROUPS, ...CR_EXTRA],
-  student: [...SHARED, ...GROUPS],
+  cr: [...SHARED, ...GROUPS, ...STUDY, ...CR_EXTRA],
+  student: [...SHARED, ...GROUPS, ...STUDY],
   alumni: ALUMNI,
 };

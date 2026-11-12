@@ -83,6 +83,13 @@ export async function ensureIndexes(db: Db): Promise<void> {
   await db.collection("library_resources").createIndex({ courseId: 1 });
   await db.collection("study_groups").createIndex({ courseId: 1, section: 1 });
   await db.collection("study_groups").createIndex({ "members.userId": 1 });
+  /* AI features (Phase 9) */
+  await db.collection("material_chunks").createIndex({ courseId: 1 });
+  await db.collection("material_chunks").createIndex({ materialId: 1 });
+  await db.collection("assistant_messages").createIndex({ courseId: 1, userId: 1, createdAt: 1 });
+  await db.collection("material_summaries").createIndex({ materialId: 1 }, { unique: true });
+  await db.collection("quizzes").createIndex({ courseId: 1, createdAt: -1 });
+  await db.collection("study_plans").createIndex({ userId: 1 }, { unique: true });
 
   await db.collection("meta").updateOne(
     { _id: "schema" } as never,
