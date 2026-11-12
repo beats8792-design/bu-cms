@@ -11,6 +11,7 @@ const SHARED: NavItem[] = [
   { href: "/courses", label: "Courses" },
   { href: "/schedule", label: "Schedule" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/library", label: "Library" },
   { href: "/announcements", label: "Announcements" },
   { href: "/notifications", label: "Notifications" },
   { href: "/profile", label: "Profile" },
@@ -25,15 +26,20 @@ const ADMIN_EXTRA: NavItem[] = [
 
 const CR_EXTRA: NavItem[] = [{ href: "/cr", label: "CR dashboard" }];
 
+/** Study groups are for students/CRs and alumni seniors (canJoinGroup). */
+const GROUPS: NavItem[] = [{ href: "/groups", label: "Groups" }];
+
 const ALUMNI: NavItem[] = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/library", label: "Library" },
+  { href: "/groups", label: "Groups" },
   { href: "/announcements", label: "Announcements" },
 ];
 
 export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   admin: [...SHARED, ...ADMIN_EXTRA],
   teacher: SHARED,
-  cr: [...SHARED, ...CR_EXTRA],
-  student: SHARED,
+  cr: [...SHARED, ...GROUPS, ...CR_EXTRA],
+  student: [...SHARED, ...GROUPS],
   alumni: ALUMNI,
 };

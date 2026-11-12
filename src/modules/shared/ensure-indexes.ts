@@ -23,8 +23,9 @@ export const DOMAIN_COLLECTIONS = [
   "results",
   "announcements",
   "notifications",
+  "course_notes",
+  "library_resources",
   "study_groups",
-  "resource_library",
   "activity_logs",
   "calendar_events",
 ] as const;
@@ -69,6 +70,19 @@ export async function ensureIndexes(db: Db): Promise<void> {
   );
   await db.collection("announcements").createIndex({ pinned: -1, createdAt: -1 });
   await db.collection("announcements").createIndex({ scope: 1, refId: 1 });
+  /* collaboration (Phase 8) */
+  await db.collection("course_notes").createIndex({ courseId: 1, pinned: -1, createdAt: -1 });
+  // Text search over title + description for library browse; one text index
+  // per collection, so title (weight 2) leads description (weight 1).
+  await db.collection("library_resources").createIndex(
+    { title: "text", description: "text" },
+    { weights: { title: 2, description: 1 }, name: "library_text_search" },
+  );
+  await db.collection("library_resources").createIndex({ kind: 1 });
+  await db.collection("library_resources").createIndex({ approved: 1, createdAt: -1 });
+  await db.collection("library_resources").createIndex({ courseId: 1 });
+  await db.collection("study_groups").createIndex({ courseId: 1, section: 1 });
+  await db.collection("study_groups").createIndex({ "members.userId": 1 });
 
   await db.collection("meta").updateOne(
     { _id: "schema" } as never,

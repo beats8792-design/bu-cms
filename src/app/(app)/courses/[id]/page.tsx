@@ -23,6 +23,8 @@ import {
   OpenSessionForm,
   ThresholdForm,
 } from "@/modules/attendance/components/attendance-forms";
+import { listNotes } from "@/modules/collab/notes";
+import { NoteActions, NoteUploader } from "@/modules/collab/components/collab-forms";
 
 export const instant = false;
 
@@ -81,6 +83,7 @@ export default async function CoursePage({ params }: Props) {
 
   const rosterSections = [...new Set(roster.map((r) => r.section))];
   const isStudentishEnrolled = (isStudent || isCr) && myRow?.status === "enrolled";
+  const notes = canManage || isStudentishEnrolled ? await listNotes(session, course.id) : [];
 
   const teachers = isAdmin
     ? (await listUsers(session, { role: "teacher" })).users.map((t) => ({
@@ -198,6 +201,50 @@ export default async function CoursePage({ params }: Props) {
           </div>
         ) : null}
       </section>
+
+      {/* Notes shared by course members (UCM-C1) */}
+      {canManage || isStudentishEnrolled ? (
+        <section className="mt-8">
+          <h2 className="font-display text-lg font-semibold">Notes</h2>
+          {notes.length === 0 ? (
+            <p className="mt-2 text-sm text-muted">No notes yet.</p>
+          ) : (
+            <ul className="mt-2 flex flex-col gap-1">
+              {notes.map((n) => (
+                <li key={n.id} className={`flex flex-wrap items-center gap-2 rounded-md border border-border bg-surface p-2 text-sm ${n.pinned ? "border-l-4 border-l-primary" : ""}`}>
+                  <a href={`/api/notes/${n.id}/download`} className="font-medium hover:underline">
+                    {n.title}
+                  </a>
+                  {n.pinned ? (
+                    <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">
+                      pinned
+                    </span>
+                  ) : null}
+                  <span className="text-xs text-muted">by {n.uploaderName}</span>
+                  <span className="num text-xs text-muted">
+                    {n.downloads} download{n.downloads === 1 ? "" : "s"}
+                  </span>
+                  <span className="ml-auto">
+                    <NoteActions
+                      note={n}
+                      canPin={canManage}
+                      canDelete={isAdmin || n.uploaderId === user.id || isTeacherOfCourse}
+                    />
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {canManage || isStudentishEnrolled ? (
+            <details className="mt-4">
+              <summary className="cursor-pointer text-sm font-medium text-primary">Share a note</summary>
+              <div className="mt-3">
+                <NoteUploader courseId={course.id} />
+              </div>
+            </details>
+          ) : null}
+        </section>
+      ) : null}
 
       {/* Assignments (UCM-F10…F14) */}
       {canManage || myRow?.status === "enrolled" || user.role === "alumni" ? (
