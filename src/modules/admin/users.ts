@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db";
 import { requireRole, type Role, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
 import type { ImportRow } from "@/modules/admin/csv";
+import { record } from "@/modules/admin/activity";
 
 /**
  * Admin user-management service (UCM-D2).
@@ -124,6 +125,7 @@ export async function transitionUser(
   }
 
   await col.updateOne({ email }, { $set: { status: target } });
+  await record(session, `user.${transition}`, email);
 }
 
 export async function setUserRole(
@@ -142,12 +144,14 @@ export async function setUserRole(
     throw new AppError("CONFLICT", "You cannot change your own role out of admin.");
   }
   await col.updateOne({ email }, { $set: { role } });
+  await record(session, "user.role", email, `role → ${role}`);
 }
 
 export async function markEmailVerified(session: SessionForAuth | null, email: string): Promise<void> {
   requireRole(session, ["admin"]);
   const db = await getDb();
   await db.collection("user").updateOne({ email }, { $set: { emailVerified: true } });
+  await record(session, "user.verify", email);
 }
 
 /* ------------------------------------------------------------ bulk import */
@@ -212,9 +216,9 @@ export async function importUsers(
     summary.imported++;
   }
 
+  await record(session, "user.import", `${summary.imported} accounts`, `${summary.existing} already existed`);
   return summary;
 }
-
 /* -------------------------------------------------------------- internals */
 
 function escapeRegex(value: string): string {

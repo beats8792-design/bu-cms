@@ -3,6 +3,7 @@ import { requireRole, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
 import { DepartmentSchema, type Department } from "@/modules/academic/schema";
 import { toObjectId } from "@/modules/academic/model";
+import { record } from "@/modules/admin/activity";
 
 /**
  * Departments service (UCM-F4). Admin-only writes; every function re-checks
@@ -49,6 +50,7 @@ export async function createDepartment(session: SessionForAuth | null, input: un
     createdAt: new Date(),
     updatedAt: new Date(),
   });
+  await record(session, "department.create", parsed.data.code, parsed.data.name);
 }
 
 export async function updateDepartment(
@@ -72,4 +74,5 @@ export async function updateDepartment(
     { $set: { ...parsed.data, updatedAt: new Date() } },
   );
   if (res.matchedCount === 0) throw new AppError("NOT_FOUND", "Department not found.");
+  await record(session, "department.update", parsed.data.code);
 }

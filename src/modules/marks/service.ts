@@ -407,4 +407,6 @@ export async function setPublished(
     const { notifyResultsPublished } = await import("@/modules/notifications/service");
     await notifyResultsPublished(courseId, course.code, enrolled.map((e) => e.userId));
   }
+  const { record } = await import("@/modules/admin/activity");
+  await record(session, "marks.publish", course.code, published ? "published" : "unpublished");
 }

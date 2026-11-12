@@ -22,6 +22,8 @@ const ADMIN_EXTRA: NavItem[] = [
   { href: "/admin/departments", label: "Admin · Departments" },
   { href: "/admin/semesters", label: "Admin · Semesters" },
   { href: "/admin/courses", label: "Admin · Courses" },
+  { href: "/admin/analytics", label: "Admin · Analytics" },
+  { href: "/admin/logs", label: "Admin · Activity log" },
 ];
 
 const CR_EXTRA: NavItem[] = [{ href: "/cr", label: "CR dashboard" }];

@@ -5,6 +5,7 @@ import { canSelfEnroll, type EnrollmentStatus } from "@/modules/academic/schema"
 import { ObjectId } from "mongodb";
 import { toObjectId } from "@/modules/academic/model";
 import type { CourseRow } from "@/modules/academic/courses";
+import { record } from "@/modules/admin/activity";
 
 /**
  * Enrollment service (UCM-F7). Rules enforced here, in one place:
@@ -199,6 +200,7 @@ export async function manualEnroll(
     },
     { upsert: true },
   );
+  await record(session, "enrollment.override", studentEmail, `${course.code} → section ${section}`);
 }
 
 export async function drop(
@@ -231,6 +233,9 @@ export async function drop(
     { $set: { status: "dropped", droppedAt: new Date() } },
   );
   if (res.matchedCount === 0) throw new AppError("CONFLICT", "No active enrollment found.");
+  if (target !== user.id) {
+    await record(session, "course.drop", `${courseId}:${target}`);
+  }
 }
 
 /** My enrolled course ids (dashboard, timetable). */

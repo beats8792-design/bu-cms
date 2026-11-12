@@ -1,6 +1,7 @@
 import { getDb } from "@/lib/db";
 import { requireRole, type Role, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
+import { record } from "@/modules/admin/activity";
 import {
   CourseSchema,
   findScheduleConflicts,
@@ -145,6 +146,7 @@ export async function createCourse(session: SessionForAuth | null, input: unknow
     createdAt: new Date(),
     updatedAt: new Date(),
   });
+  await record(session, "course.create", parsed.data.code, parsed.data.title);
   return String(inserted.insertedId);
 }
 
@@ -185,6 +187,7 @@ export async function updateCourse(
     { _id: toObjectId(id) },
     { $set: { ...parsed.data, updatedAt: new Date() } },
   );
+  await record(session, "course.update", parsed.data.code);
 }
 
 /** Admin-only: assign/replace the teaching roster (input:false territory). */

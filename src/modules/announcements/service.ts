@@ -261,6 +261,8 @@ export async function createAnnouncement(
     });
   }
 
+  const { record } = await import("@/modules/admin/activity");
+  await record(session, "announcement.create", `${scope}:${refId || ""}`, title);
   return String(inserted.insertedId);
 }
 

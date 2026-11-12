@@ -3,6 +3,7 @@ import { requireRole, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
 import { SemesterSchema, type Semester } from "@/modules/academic/schema";
 import { toObjectId } from "@/modules/academic/model";
+import { record } from "@/modules/admin/activity";
 
 /**
  * Semesters service (UCM-F5). Admin-only writes. The enrollment-window flag
@@ -64,6 +65,7 @@ export async function createSemester(session: SessionForAuth | null, input: unkn
   if (dup) throw new AppError("CONFLICT", `${parsed.data.term} ${parsed.data.academicYear} already exists.`);
 
   await db.collection("semesters").insertOne({ ...parsed.data, createdAt: new Date(), updatedAt: new Date() });
+  await record(session, "semester.create", `${parsed.data.term} ${parsed.data.academicYear}`);
 }
 
 export async function updateSemester(
@@ -81,6 +83,7 @@ export async function updateSemester(
     { $set: { ...parsed.data, updatedAt: new Date() } },
   );
   if (res.matchedCount === 0) throw new AppError("NOT_FOUND", "Semester not found.");
+  await record(session, "semester.update", `${parsed.data.term} ${parsed.data.academicYear}`);
 }
 
 /** Window toggle is its own tiny action — it's the highest-traffic admin control. */
