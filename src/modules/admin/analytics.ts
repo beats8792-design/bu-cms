@@ -1,6 +1,7 @@
 import { getDb } from "@/lib/db";
 import { requireRole, type SessionForAuth } from "@/modules/auth/rbac";
 import { weightedTotal, gradeFor, type AssessmentComponent } from "@/modules/marks/schema";
+import { toObjectId } from "@/modules/academic/model";
 
 /**
  * Admin analytics (UCM-D4…D7). All aggregations are plain Mongo queries + JS
@@ -348,26 +349,29 @@ export async function atRiskStudents(
   if (courseIds.length === 0) return [];
   const db = await getDb();
 
-  const [enrollments, sessions, records, schemas, marks] = await Promise.all([
+  const [enrollments, sessions, schemas, marks] = await Promise.all([
     fetchAll(db, "enrollments", { courseId: { $in: courseIds }, status: "enrolled" }) as unknown as Promise<
       Array<{ courseId: string; userId: string; section: string }>
     >,
     fetchAll(db, "attendance_sessions", { courseId: { $in: courseIds }, status: { $ne: "open" } }) as unknown as Promise<
       Array<{ _id: unknown; courseId: string; section: string }>
     >,
-    fetchAll(db, "attendance_records", {}) as unknown as Promise<
-      Array<{ sessionId: string; userId: string; status: string }>
-    >,
     fetchAll(db, "assessment_schemas", { courseId: { $in: courseIds } }) as unknown as Promise<SchemaRaw[]>,
     fetchAll(db, "marks", { courseId: { $in: courseIds } }) as unknown as Promise<
       Array<{ courseId: string; userId: string; componentKey: string; score: number | null }>
     >,
   ]);
+  // Records scoped to the fetched sessions only — never a full-collection scan.
+  const sessionIds = sessions.map((s) => String(s._id));
+  const records = (await db
+    .collection("attendance_records")
+    .find({ sessionId: { $in: sessionIds as never[] } })
+    .toArray()) as unknown as Array<{ sessionId: string; userId: string; status: string }>;
 
   const userIds = [...new Set(enrollments.map((e) => e.userId))];
   const users = (await db
     .collection("user")
-    .find({ _id: { $in: userIds as never[] } }, { projection: { name: 1, studentId: 1 } })
+    .find({ _id: { $in: userIds.map(toObjectId) } }, { projection: { name: 1, studentId: 1 } })
     .toArray()) as unknown as Array<{ _id: string; name: string; studentId?: string }>;
   const userById = new Map(users.map((u) => [String(u._id), u]));
 
@@ -437,15 +441,24 @@ export async function assignmentStats(
   const courseIds = courses.map((c) => String(c._id));
   if (courseIds.length === 0) return [];
   const db = await getDb();
-  const [assignments, submissions, enrollments] = (await Promise.all([
-    fetchAll(db, "assignments", { courseId: { $in: courseIds } }),
-    fetchAll(db, "submissions", {}),
-    fetchAll(db, "enrollments", { courseId: { $in: courseIds }, status: "enrolled" }),
-  ])) as unknown as [
-    Array<{ _id: unknown; courseId: string; title: string; points: number }>,
-    Array<{ assignmentId: string; isLate?: boolean; score?: number | null }>,
-    Array<{ courseId: string }>,
-  ];
+  // Assignments first, then submissions scoped to their ids — never a
+  // full-collection submissions scan.
+  const assignments = (await fetchAll(db, "assignments", { courseId: { $in: courseIds } })) as unknown as Array<{
+    _id: unknown;
+    courseId: string;
+    title: string;
+    points: number;
+  }>;
+  const assignmentIds = assignments.map((a) => String(a._id));
+  const [submissions, enrollments] = await Promise.all([
+    db
+      .collection("submissions")
+      .find({ assignmentId: { $in: assignmentIds as never[] } })
+      .toArray() as unknown as Promise<Array<{ assignmentId: string; isLate?: boolean; score?: number | null }>>,
+    db.collection("enrollments").find({ courseId: { $in: courseIds }, status: "enrolled" }).toArray() as unknown as Promise<
+      Array<{ courseId: string }>
+    >,
+  ]);
   const enrolledByCourse = new Map<string, number>();
   for (const e of enrollments) {
     enrolledByCourse.set(e.courseId, (enrolledByCourse.get(e.courseId) ?? 0) + 1);

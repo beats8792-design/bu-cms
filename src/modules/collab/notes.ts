@@ -10,7 +10,6 @@ import {
 } from "@/modules/collab/schema";
 import { toObjectId } from "@/modules/academic/model";
 import type { CourseRow } from "@/modules/academic/courses";
-import { ObjectId } from "mongodb";
 import { materialDeliveryUrl } from "@/modules/shared/clients/cloudinary";
 
 /**
@@ -81,7 +80,7 @@ export async function listNotes(
   const users = uploaderIds.length
     ? ((await db
         .collection("user")
-        .find({ _id: { $in: uploaderIds as unknown as ObjectId[] } }, { projection: { name: 1 } })
+        .find({ _id: { $in: uploaderIds.map(toObjectId) } }, { projection: { name: 1 } })
         .toArray()) as unknown as Array<{ _id: string; name: string }>)
     : [];
   const nameById = new Map(users.map((u) => [String(u._id), u.name]));

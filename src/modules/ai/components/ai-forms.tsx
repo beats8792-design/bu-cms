@@ -56,6 +56,9 @@ export function AskForm({ courseId, secondsLeft }: { courseId: string; secondsLe
       <button type="submit" disabled={pending} className={`self-start ${BTN}`}>
         {pending ? "Thinking…" : secondsLeft > 0 ? `Wait ${secondsLeft}s` : "Ask"}
       </button>
+      <p role="status" aria-live="polite" className="sr-only">
+        {pending ? "Searching course materials and answering…" : ""}
+      </p>
     </form>
   );
 }
@@ -125,6 +128,9 @@ export function SummaryButton({
           {pending ? "Summarizing…" : hasSummary ? "Regenerate summary" : "Generate AI summary"}
         </button>
       </form>
+      <p role="status" aria-live="polite" className="sr-only">
+        {pending ? "Summarizing the material…" : ""}
+      </p>
       {state.error ? <span className="text-xs text-danger">{state.error}</span> : null}
     </span>
   );
@@ -159,6 +165,9 @@ export function QuizGenerator({ courseId }: { courseId: string }) {
       <button type="submit" disabled={pending} className={BTN}>
         {pending ? "Generating…" : "Generate quiz draft"}
       </button>
+      <p role="status" aria-live="polite" className="sr-only">
+        {pending ? "Generating the quiz draft…" : ""}
+      </p>
       <div className="w-full">
         {state.ok ? <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Quiz draft generated — review below.</p> : null}
         {state.error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p> : null}
@@ -234,7 +243,11 @@ export function PlanGenerator({ hasPlan }: { hasPlan: boolean }) {
           {pending ? "Planning…" : hasPlan ? "Regenerate this week's plan" : "Build my weekly plan"}
         </button>
       </form>
-      {pending ? <p className="text-xs text-muted">Reading your deadlines, exams and recent topics…</p> : null}
+      {pending ? (
+        <p role="status" aria-live="polite" className="text-xs text-muted">
+          Reading your deadlines, exams and recent topics…
+        </p>
+      ) : null}
     </div>
   );
 }

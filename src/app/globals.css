@@ -36,3 +36,9 @@ body {
 .num {
   font-variant-numeric: tabular-nums;
 }
+
+/* DESIGN.md §7: visible focus ring on every interactive element. */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

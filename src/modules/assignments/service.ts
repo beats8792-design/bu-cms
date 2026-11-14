@@ -369,7 +369,7 @@ export async function teacherDashboard(
     ? ((await db
         .collection("user")
         .find(
-          { _id: { $in: userIds as unknown as never[] } },
+          { _id: { $in: userIds.map(toObjectId) } },
           { projection: { name: 1, studentId: 1 } },
         )
         .toArray()) as unknown as Array<{ _id: string; name: string; studentId?: string }>)

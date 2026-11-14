@@ -205,9 +205,9 @@ export async function importUsers(
     const password = generateRandomString(24);
     const passwordHash = await hashPassword(password);
     await accountCol.insertOne({
-      userId: String(inserted.insertedId),
+      userId: inserted.insertedId, // ObjectId — the mongo adapter coerces id/reference fields
       providerId: "credential",
-      accountId: row.email,
+      accountId: String(inserted.insertedId), // v1.7 sign-in matches accountId === user.id
       passwordHash,
       createdAt: now,
       updatedAt: now,

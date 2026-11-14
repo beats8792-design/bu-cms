@@ -123,37 +123,41 @@ export function GridRow({
   published: boolean;
 }) {
   const [state, formAction, pending] = useActionState(saveRowAction, {} as MarksFormState);
+  // A <form> can't wrap a <tr> (invalid HTML → hydration errors), so the form
+  // lives inside the last cell and the row's inputs attach via form="id".
+  const formId = `marks-row-${row.userId}`;
 
   return (
-    <form action={formAction} className="contents">
-      <tr className="border-b border-border hover:bg-primary-soft">
-        <td className="py-2 pr-3">
-          {row.name}
-          {row.studentId ? <span className="num ml-2 text-xs text-muted">{row.studentId}</span> : null}
+    <tr className="border-b border-border hover:bg-primary-soft">
+      <td className="py-2 pr-3">
+        {row.name}
+        {row.studentId ? <span className="num ml-2 text-xs text-muted">{row.studentId}</span> : null}
+      </td>
+      <td className="py-2 pr-3">{row.section}</td>
+      {components.map((c) => (
+        <td key={c.key} className="py-2 pr-3">
+          <input
+            form={formId}
+            name={`score-${c.key}`}
+            type="number"
+            min="0"
+            max={c.maxMarks}
+            step="0.5"
+            defaultValue={row.scores[c.key] ?? ""}
+            className="num w-16 rounded-md border border-border px-2 py-1"
+            aria-label={`${row.name} ${c.name}`}
+          />
+          <span className="num ml-1 text-xs text-muted">/{c.maxMarks}</span>
         </td>
-        <td className="py-2 pr-3">{row.section}</td>
-        {components.map((c) => (
-          <td key={c.key} className="py-2 pr-3">
-            <input
-              name={`score-${c.key}`}
-              type="number"
-              min="0"
-              max={c.maxMarks}
-              step="0.5"
-              defaultValue={row.scores[c.key] ?? ""}
-              className="num w-16 rounded-md border border-border px-2 py-1"
-              aria-label={`${row.name} ${c.name}`}
-            />
-            <span className="num ml-1 text-xs text-muted">/{c.maxMarks}</span>
-          </td>
-        ))}
-        <td className="num py-2 pr-3 font-semibold">{row.total}</td>
-        <td className="py-2 pr-3">
-          <span className="num rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">
-            {row.grade} · {row.gradePoint.toFixed(2)}
-          </span>
-        </td>
-        <td className="py-2">
+      ))}
+      <td className="num py-2 pr-3 font-semibold">{row.total}</td>
+      <td className="py-2 pr-3">
+        <span className="num rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">
+          {row.grade} · {row.gradePoint.toFixed(2)}
+        </span>
+      </td>
+      <td className="py-2">
+        <form id={formId} action={formAction} className="contents">
           {published ? (
             <input
               name="reason"
@@ -162,6 +166,8 @@ export function GridRow({
               aria-label={`Override reason for ${row.name}`}
             />
           ) : null}
+          <input type="hidden" name="courseId" value={courseId} />
+          <input type="hidden" name="userId" value={row.userId} />
           <button
             type="submit"
             disabled={pending}
@@ -170,11 +176,9 @@ export function GridRow({
             {pending ? "…" : "Save"}
           </button>
           {state.error ? <p className="text-xs text-danger">{state.error}</p> : null}
-        </td>
-      </tr>
-      <input type="hidden" name="courseId" value={courseId} />
-      <input type="hidden" name="userId" value={row.userId} />
-    </form>
+        </form>
+      </td>
+    </tr>
   );
 }
 

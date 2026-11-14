@@ -2,7 +2,6 @@ import { getDb } from "@/lib/db";
 import { requireRole, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
 import { canSelfEnroll, type EnrollmentStatus } from "@/modules/academic/schema";
-import { ObjectId } from "mongodb";
 import { toObjectId } from "@/modules/academic/model";
 import type { CourseRow } from "@/modules/academic/courses";
 import { record } from "@/modules/admin/activity";
@@ -86,8 +85,8 @@ export async function courseRoster(
   const users = userIds.length
     ? ((await db
         .collection("user")
-        // BetterAuth user ids are strings; driver typing assumes ObjectId.
-        .find({ _id: { $in: userIds as unknown as ObjectId[] } }, { projection: { name: 1, email: 1, studentId: 1 } })
+        // user._id is stored as ObjectId (BetterAuth mongo adapter); join via toObjectId.
+        .find({ _id: { $in: userIds.map(toObjectId) } }, { projection: { name: 1, email: 1, studentId: 1 } })
         .toArray()) as unknown as { _id: string; name: string; email: string; studentId?: string }[])
     : [];
   const byId = new Map(users.map((u) => [String(u._id), u]));

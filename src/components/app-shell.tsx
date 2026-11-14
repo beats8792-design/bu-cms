@@ -57,6 +57,12 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
 
   return (
     <div className="flex min-h-dvh w-full flex-col bg-bg">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:shadow-card"
+      >
+        Skip to content
+      </a>
       <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-surface px-4">
         <div className="flex items-center gap-2">
           <button
@@ -101,7 +107,7 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
             <div className="border-b border-border bg-surface">{nav}</div>
           </div>
         )}
-        <main className="min-w-0 flex-1 p-6">{children}</main>
+        <main id="main-content" className="min-w-0 flex-1 p-6">{children}</main>
       </div>
     </div>
   );

@@ -81,11 +81,10 @@ function createAuth() {
           },
         },
       },
-      advanced: {
-        database: {
-          joins: true,
-        },
-      },
+      // NOTE: `advanced.database.joins: true` was removed — with it the mongo
+      // adapter returns joined account docs raw (key `passwordHash`), which
+      // breaks the sign-in password lookup (core expects field `password`).
+      // The fallback join does the same work with correct field mapping.
       rateLimit: {
         enabled: true,
         window: 60, // seconds

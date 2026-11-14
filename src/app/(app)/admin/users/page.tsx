@@ -91,6 +91,7 @@ export default async function AdminUsersPage({
       </ul>
       <div className="mt-3 hidden overflow-x-auto rounded-lg border border-border bg-surface md:block">
         <table className="w-full text-left text-sm">
+          <caption className="sr-only">User accounts</caption>
           <thead>
             <tr className="border-b border-border text-xs uppercase tracking-wide text-muted">
               <th className="px-4 py-3">User</th>

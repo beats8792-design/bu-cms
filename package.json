@@ -9,8 +9,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "e2e": "playwright test",
     "db:setup": "tsx scripts/db-setup.ts",
-    "adm": "tsx scripts/create-admin.ts"
+    "adm": "tsx scripts/create-admin.ts",
+    "seed": "tsx scripts/seed-demo.ts"
   },
   "type": "module",
   "dependencies": {
@@ -30,6 +32,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.2",
     "@types/react": "^19",

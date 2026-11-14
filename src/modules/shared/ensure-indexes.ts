@@ -90,6 +90,12 @@ export async function ensureIndexes(db: Db): Promise<void> {
   await db.collection("material_summaries").createIndex({ materialId: 1 }, { unique: true });
   await db.collection("quizzes").createIndex({ courseId: 1, createdAt: -1 });
   await db.collection("study_plans").createIndex({ userId: 1 }, { unique: true });
+  /* Hardening pass (Phase 11): hot-path indexes found missing in the audit */
+  await db.collection("materials").createIndex({ courseId: 1, createdAt: -1 });
+  await db.collection("user").createIndex({ role: 1, status: 1 });
+  await db.collection("user").createIndex({ departmentId: 1 });
+  await db.collection("activity_logs").createIndex({ createdAt: -1 });
+  await db.collection("activity_logs").createIndex({ action: 1, createdAt: -1 });
 
   await db.collection("meta").updateOne(
     { _id: "schema" } as never,

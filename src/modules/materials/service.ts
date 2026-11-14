@@ -64,7 +64,9 @@ export async function loadCourseForMaterials(courseId: string): Promise<CourseRo
     | ({ _id: unknown } & CourseRow)
     | null;
   if (!doc) throw new AppError("NOT_FOUND", "Course not found.");
-  return doc;
+  // CourseRow expects a string `id`; the raw doc only has `_id`. Without this,
+  // canAccessCourse queried `courseId: undefined` and every student got 403.
+  return { ...doc, id: String(doc._id), teacherIds: (doc.teacherIds ?? []).map(String) };
 }
 
 function isManager(course: CourseRow, session: SessionForAuth): boolean {

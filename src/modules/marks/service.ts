@@ -18,7 +18,6 @@ import {
 } from "@/modules/marks/schema";
 import { toObjectId } from "@/modules/academic/model";
 import type { CourseRow } from "@/modules/academic/courses";
-import { ObjectId } from "mongodb";
 
 /**
  * Marks & results service (UCM-F18…F24). Authorization spine as before:
@@ -134,7 +133,7 @@ export async function marksGrid(
   const users = userIds.length
     ? ((await db
         .collection("user")
-        .find({ _id: { $in: userIds as unknown as ObjectId[] } }, { projection: { name: 1, studentId: 1 } })
+        .find({ _id: { $in: userIds.map(toObjectId) } }, { projection: { name: 1, studentId: 1 } })
         .toArray()) as unknown as Array<{ _id: string; name: string; studentId?: string }>)
     : [];
   const userById = new Map(users.map((u) => [String(u._id), u]));

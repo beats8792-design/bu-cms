@@ -59,9 +59,9 @@ async function main(): Promise<void> {
 
     const tempPassword = generateRandomString(32);
     await accounts.insertOne({
-      userId: userDoc._id.toString(),
+      userId: userDoc._id, // ObjectId — the mongo adapter coerces id/reference fields
       providerId: "credential",
-      accountId: email,
+      accountId: userDoc._id.toString(), // v1.7 sign-in matches accountId === user.id
       passwordHash: await hashPassword(tempPassword),
       createdAt: now,
       updatedAt: now,

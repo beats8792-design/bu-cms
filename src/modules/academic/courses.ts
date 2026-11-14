@@ -8,7 +8,6 @@ import {
   type Course,
   type ScheduleSlot,
 } from "@/modules/academic/schema";
-import { ObjectId } from "mongodb";
 import { toObjectId } from "@/modules/academic/model";
 
 /**
@@ -215,8 +214,8 @@ export async function teacherNamesByIds(
   const db = await getDb();
   const docs = (await db
     .collection("user")
-    // BetterAuth user ids are strings; driver typing assumes ObjectId.
-    .find({ _id: { $in: ids as unknown as ObjectId[] } }, { projection: { name: 1 } })
+    // user._id is stored as ObjectId (BetterAuth mongo adapter); join via toObjectId.
+    .find({ _id: { $in: ids.map(toObjectId) } }, { projection: { name: 1 } })
     .toArray()) as unknown as { _id: string; name: string }[];
   return new Map(docs.map((d) => [String(d._id), d.name]));
 }

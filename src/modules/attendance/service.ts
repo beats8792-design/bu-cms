@@ -205,7 +205,7 @@ export async function courseDigest(
   const users = userIds.length
     ? ((await db
         .collection("user")
-        .find({ _id: { $in: userIds as unknown as ObjectId[] } }, { projection: { name: 1, studentId: 1 } })
+        .find({ _id: { $in: userIds.map(toObjectId) } }, { projection: { name: 1, studentId: 1 } })
         .toArray()) as unknown as Array<{ _id: string; name: string; studentId?: string }>)
     : [];
   const userById = new Map(users.map((u) => [String(u._id), u]));

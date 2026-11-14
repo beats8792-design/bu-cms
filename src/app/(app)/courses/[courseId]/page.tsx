@@ -29,16 +29,16 @@ import { NoteActions, NoteUploader } from "@/modules/collab/components/collab-fo
 export const instant = false;
 
 interface Props {
-  params: Promise<{ id: string }>;
+  params: Promise<{ courseId: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  return { title: `Course ${id.slice(-6)} · UCMS` };
+  const { courseId } = await params;
+  return { title: `Course ${courseId.slice(-6)} · UCMS` };
 }
 
 export default async function CoursePage({ params }: Props) {
-  const { id } = await params;
+  const { courseId: id } = await params;
   const { user } = await appGate();
   const session = { user };
 
