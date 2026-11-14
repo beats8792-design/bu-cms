@@ -16,20 +16,18 @@ const OptionalEnv = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
-  GEMINI_API_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   RESEND_FROM: z.string().optional(),
   CRON_SECRET: z.string().optional(),
-  OPENROUTER_API_KEY: z.string().optional(),
-  OPENROUTER_MODEL: z.string().optional(),
-  OPENROUTER_EMBEDDING_MODEL: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().optional(),
+  GEMINI_EMBEDDING_MODEL: z.string().optional(),
 });
 
 export type OptionalServices = {
   cloudinary: boolean;
   gemini: boolean;
   resend: boolean;
-  openrouter: boolean;
 };
 
 export type ServerEnv = z.infer<typeof RequiredEnv> &
@@ -49,7 +47,6 @@ function build(): ServerEnv {
     ),
     gemini: Boolean(optional.GEMINI_API_KEY),
     resend: Boolean(optional.RESEND_API_KEY),
-    openrouter: Boolean(optional.OPENROUTER_API_KEY),
   };
 
   return { ...required, ...optional, services };

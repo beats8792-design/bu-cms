@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { appGate } from "@/modules/auth/session";
 import { getPlan } from "@/modules/ai/planner";
-import { aiConfigured } from "@/modules/ai/openrouter";
+import { aiConfigured } from "@/modules/ai/gemini";
 import { PlanBoard, PlanGenerator } from "@/modules/ai/components/ai-forms";
 
 export const metadata: Metadata = { title: "Study plan · UCMS" };

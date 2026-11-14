@@ -2,9 +2,9 @@ import { z } from "zod";
 
 /**
  * AI contracts + pure policies (Phase 9, UCM-A1–A4). Everything I/O-free lives
- * here so it unit-tests without OpenRouter: chunking, cosine similarity,
+ * here so it unit-tests without the AI service: chunking, cosine similarity,
  * quotas/rate limits and the three structured-output schemas. API access is
- * in `openrouter.ts`; Mongo access in rag/assistant/summarizer/quiz/planner.
+ * in `gemini.ts`; Mongo access in rag/assistant/summarizer/quiz/planner.
  */
 
 /* ------------------------------------------------------------------ chunking */

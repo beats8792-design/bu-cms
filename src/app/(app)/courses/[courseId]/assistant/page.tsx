@@ -5,7 +5,7 @@ import { appGate } from "@/modules/auth/session";
 import { getCourse } from "@/modules/academic/courses";
 import { listThread, quotaState } from "@/modules/ai/assistant";
 import { courseChunkCount } from "@/modules/ai/rag";
-import { aiConfigured } from "@/modules/ai/openrouter";
+import { aiConfigured } from "@/modules/ai/gemini";
 import { AskForm, ClearThreadButton, MessageList, ReindexButton } from "@/modules/ai/components/ai-forms";
 
 export const instant = false;

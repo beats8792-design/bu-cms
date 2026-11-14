@@ -1,7 +1,7 @@
 import { getDb } from "@/lib/db";
 import { requireRole, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
-import { AiError, aiConfigured, chat, extractJson } from "@/modules/ai/openrouter";
+import { AiError, aiConfigured, chat, extractJson } from "@/modules/ai/gemini";
 import { SummarySchema, type MaterialSummary } from "@/modules/ai/schema";
 import { toObjectId } from "@/modules/academic/model";
 import { isEnrolledIn } from "@/modules/collab/notes";
@@ -85,7 +85,7 @@ export async function generateSummary(
     throw new AppError("FORBIDDEN", "Only the course's members can generate summaries.");
   }
   if (!aiConfigured()) {
-    throw new AiError("AI features are not configured yet — add OPENROUTER_API_KEY to the environment.", 503);
+    throw new AiError("AI features are not configured yet — add GEMINI_API_KEY to the environment.", 503);
   }
 
   // Long materials are truncated for the prompt — the summary is a study aid,

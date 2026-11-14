@@ -1,7 +1,7 @@
 import { getDb } from "@/lib/db";
 import { requireRole, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
-import { AiError, aiConfigured, chat } from "@/modules/ai/openrouter";
+import { AiError, aiConfigured, chat } from "@/modules/ai/gemini";
 import {
   AskSchema,
   MIN_ASK_GAP_SECONDS,
@@ -112,7 +112,7 @@ export async function ask(
     throw new AppError("FORBIDDEN", "Only the course's members can use the assistant.");
   }
   if (!aiConfigured()) {
-    throw new AiError("AI features are not configured yet — add OPENROUTER_API_KEY to the environment.", 503);
+    throw new AiError("AI features are not configured yet — add GEMINI_API_KEY to the environment.", 503);
   }
 
   // Quota (per Dhaka day) + minimum gap between asks.

@@ -1,7 +1,7 @@
 import { getDb } from "@/lib/db";
 import { requireRole, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
-import { AiError, aiConfigured, chat, extractJson } from "@/modules/ai/openrouter";
+import { AiError, aiConfigured, chat, extractJson } from "@/modules/ai/gemini";
 import { WeeklyPlanSchema, type StudyPlan } from "@/modules/ai/schema";
 import { myCourseIds } from "@/modules/academic/enrollment";
 import { listCourses } from "@/modules/academic/courses";
@@ -64,7 +64,7 @@ export async function generatePlan(session: SessionForAuth | null): Promise<Stud
   requireRole(session, ["student", "cr"]);
   const user = session!.user as unknown as { id: string; name: string };
   if (!aiConfigured()) {
-    throw new AiError("AI features are not configured yet — add OPENROUTER_API_KEY to the environment.", 503);
+    throw new AiError("AI features are not configured yet — add GEMINI_API_KEY to the environment.", 503);
   }
   const db = await getDb();
 

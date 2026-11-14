@@ -4,7 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getServerSession } from "@/modules/auth/session";
 import { AppError } from "@/modules/shared/errors";
-import { AiError } from "@/modules/ai/openrouter";
+import { AiError } from "@/modules/ai/gemini";
 import { ask, clearThread } from "@/modules/ai/assistant";
 import { generateSummary } from "@/modules/ai/summarizer";
 import { deleteQuiz, generateQuiz } from "@/modules/ai/quiz";

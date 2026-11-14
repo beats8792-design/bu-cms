@@ -7,8 +7,8 @@ and audit logs.
 
 Built with **Next.js 16** (App Router, Cache Components), **MongoDB Atlas**,
 **BetterAuth** (credential auth + mongo adapter), **Tailwind 4**, **Cloudinary**
-(file storage), **Resend** (email) and **OpenRouter** (AI — defaults to
-`google/gemini-2.5-flash`).
+(file storage), **Resend** (email) and **Google Gemini** (AI — defaults to
+`gemini-3.8-flash`, key `GEMINI_API_KEY`).
 
 ## Quick start (local)
 
@@ -43,11 +43,10 @@ All server-side. Required services fail fast at boot; optional ones degrade to
 | `BETTERAUTH_URL` | prod ✅ | e.g. `http://localhost:3000` locally, your domain in prod |
 | `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | — | File uploads (materials, notes, submissions) |
 | `RESEND_API_KEY` / `RESEND_FROM` | — | Email: verification, password reset, notifications |
-| `OPENROUTER_API_KEY` | — | AI assistant / summaries / quiz / planner |
-| `OPENROUTER_MODEL` | — | Default `google/gemini-2.5-flash` |
-| `OPENROUTER_EMBEDDING_MODEL` | — | Default `openai/text-embedding-3-small` |
+| `GEMINI_API_KEY` | — | AI assistant / summaries / quiz / planner |
+| `GEMINI_MODEL` | — | Default `gemini-3.8-flash` |
+| `GEMINI_EMBEDDING_MODEL` | — | Default `gemini-embedding-001` |
 | `CRON_SECRET` | — | Bearer token for `/api/cron/reminders` (Vercel Cron) |
-| `GEMINI_API_KEY` | — | Unused (kept for parity — OpenRouter is the locked AI choice) |
 
 ## Scripts
 
@@ -98,7 +97,7 @@ src/
     academic/     departments, semesters, courses, enrollment, calendar
     materials/ assignments/ marks/ attendance/ announcements/
     collab/       notes, study groups, library
-    ai/           assistant, summaries, quiz, planner (OpenRouter)
+    ai/           assistant, summaries, quiz, planner (Google Gemini)
     auth/         BetterAuth setup, session helpers, RBAC
     admin/        users, analytics, activity log
   lib/            db client, env validation, shared clients

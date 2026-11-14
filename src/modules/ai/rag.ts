@@ -1,19 +1,19 @@
 import { getDb } from "@/lib/db";
 import { requireRole, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
-import { AiError, aiConfigured, embed, embeddingModel } from "@/modules/ai/openrouter";
+import { AiError, aiConfigured, embed, embeddingModel } from "@/modules/ai/gemini";
 import { chunkText, cosineSimilarity } from "@/modules/ai/schema";
 import { toObjectId } from "@/modules/academic/model";
 
 /**
- * RAG infrastructure (ARCHITECTURE.md §6, adapted to OpenRouter):
- * upload (Phase 3) → chunkText → embeddings via /api/v1/embeddings →
+ * RAG infrastructure (ARCHITECTURE.md §6, adapted to the Gemini API):
+ * upload (Phase 3) → chunkText → embeddings via batchEmbedContents →
  * `material_chunks` → retrieval = embed the question, brute-force cosine in
  * RAM over the course's chunks, top-k. A course has hundreds to a few
  * thousand chunks — no vector database needed at v1 scale.
  *
  * Chunks store the embedding model they were built with; retrieval only ever
- * compares vectors from the same model, so switching OPENROUTER_EMBEDDING_MODEL
+ * compares vectors from the same model, so switching GEMINI_EMBEDDING_MODEL
  * degrades to "needs reindexing" instead of dimension-mismatch crashes.
  */
 
@@ -46,7 +46,7 @@ export async function indexMaterial(materialId: string): Promise<number> {
     | null;
   if (!material) throw new AppError("NOT_FOUND", "Material not found.");
   if (!aiConfigured()) {
-    throw new AiError("AI features are not configured yet — add OPENROUTER_API_KEY to the environment.", 503);
+    throw new AiError("AI features are not configured yet — add GEMINI_API_KEY to the environment.", 503);
   }
 
   const chunks = chunkText(material.textContent ?? "");

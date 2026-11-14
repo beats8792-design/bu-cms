@@ -14,7 +14,7 @@ import {
   WeeklyPlanSchema,
   WEEKDAY,
 } from "@/modules/ai/schema";
-import { extractJson } from "@/modules/ai/openrouter";
+import { extractJson } from "@/modules/ai/gemini";
 
 describe("chunkText (RAG step 2)", () => {
   it("returns [] for empty/blank text", () => {

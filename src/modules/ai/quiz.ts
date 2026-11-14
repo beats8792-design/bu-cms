@@ -2,7 +2,7 @@ import { getDb } from "@/lib/db";
 import { requireRole, type SessionForAuth } from "@/modules/auth/rbac";
 import { AppError } from "@/modules/shared/errors";
 import { z } from "zod";
-import { AiError, aiConfigured, chat, extractJson } from "@/modules/ai/openrouter";
+import { AiError, aiConfigured, chat, extractJson } from "@/modules/ai/gemini";
 import { QuizDraftSchema, type QuizDraft } from "@/modules/ai/schema";
 import { retrieve } from "@/modules/ai/rag";
 import { toObjectId } from "@/modules/academic/model";
@@ -79,7 +79,7 @@ export async function generateQuiz(
     throw new AppError("FORBIDDEN", "Only the course's members can generate quizzes.");
   }
   if (!aiConfigured()) {
-    throw new AiError("AI features are not configured yet — add OPENROUTER_API_KEY to the environment.", 503);
+    throw new AiError("AI features are not configured yet — add GEMINI_API_KEY to the environment.", 503);
   }
 
   // Ground the questions in retrieved chunks (topic-embedded when given,
