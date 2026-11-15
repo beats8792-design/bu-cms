@@ -18,7 +18,7 @@ export default async function CalendarPage() {
   const canPost = user.role === "admin" || user.role === "teacher";
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">Academic calendar</h1>
       <p className="mt-1 text-sm text-muted">Exams, holidays and notices across the university.</p>
 

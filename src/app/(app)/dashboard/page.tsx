@@ -61,7 +61,7 @@ export default async function DashboardPage() {
   const { user } = await appGate();
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">
         Welcome, {user.displayName || user.name}
       </h1>

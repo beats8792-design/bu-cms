@@ -18,7 +18,7 @@ export default async function ProfilePage() {
   const canEditStudentId = user.role === "student" || user.role === "cr";
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">Profile</h1>
       <dl className="mt-4 grid max-w-md grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
         <dt className="text-muted">Email</dt>

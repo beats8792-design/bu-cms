@@ -32,7 +32,7 @@ export default async function CrDashboardPage() {
   >[];
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">CR dashboard</h1>
       <p className="mt-1 text-sm text-muted">
         Your classes at a glance. Post announcements from{" "}

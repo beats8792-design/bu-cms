@@ -39,7 +39,7 @@ export default async function GroupsPage() {
     : [];
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">Study groups</h1>
       <p className="mt-1 text-sm text-muted">
         Per-course study groups with a shared notepad. Seniors (alumni) can join too.

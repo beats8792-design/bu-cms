@@ -41,7 +41,7 @@ export default async function LibraryPage({ searchParams }: Props) {
   const activeFilters = Object.entries(query).filter(([, v]) => v).length;
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">Resource library</h1>
       <p className="mt-1 text-sm text-muted">
         Past papers, seniors&apos; guides and other shared files — tagged by department, course and

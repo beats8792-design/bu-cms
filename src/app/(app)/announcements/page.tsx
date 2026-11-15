@@ -47,7 +47,7 @@ export default async function AnnouncementsPage() {
   const canSeeComposer = scopes.length > 0 && canCompose !== null;
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">Announcements</h1>
 
       {canSeeComposer && canCompose ? (

@@ -13,7 +13,7 @@ export default async function NotificationsPage() {
   const { items, unread } = await listMine({ user }, { limit: 50 });
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">Notifications</h1>
       <p className="mt-1 text-sm text-muted">
         {unread > 0 ? `${unread} unread` : "All caught up."}

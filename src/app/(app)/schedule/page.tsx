@@ -29,7 +29,7 @@ export default async function SchedulePage() {
   const grid = buildWeekGrid(slots);
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">My Week</h1>
       <p className="mt-1 text-sm text-muted">
         {user.role === "teacher" ? "Your teaching schedule across all courses." : "Classes from your enrolled courses."}

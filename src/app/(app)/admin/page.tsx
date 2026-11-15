@@ -18,7 +18,7 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">Admin console</h1>
 
       {/* Institution counts (UCM-D1) */}

@@ -28,7 +28,7 @@ export default async function CoursesPage() {
     user.role === "admin" || user.role === "teacher" ? await listDepartments({ user }) : [];
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">Courses</h1>
       <p className="mt-1 text-sm text-muted">
         {current

@@ -15,7 +15,7 @@ export default async function StudyPlanPage() {
   // UCM-A4 is a student/CR feature (planner service enforces this too).
   if (user.role !== "student" && user.role !== "cr") {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-6xl">
         <h1 className="font-display text-2xl font-semibold">Study plan</h1>
         <p className="mt-2 text-sm text-muted">The AI study planner is available to enrolled students and CRs.</p>
       </div>
@@ -25,7 +25,7 @@ export default async function StudyPlanPage() {
   const plan = await getPlan(session);
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">My weekly study plan</h1>
       <p className="mt-1 text-sm text-muted">
         Built from your enrollments, upcoming deadlines, exam dates and recently covered topics. Tick items off as you
