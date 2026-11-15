@@ -99,7 +99,7 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
       </header>
 
       <div className="flex w-full flex-1">
-        <aside className="hidden w-64 shrink-0 border-r border-border bg-surface md:block">
+        <aside className="hidden w-64 shrink-0 border-r border-border bg-surface md:sticky md:top-14 md:block md:h-[calc(100dvh-3.5rem)] md:self-start md:overflow-y-auto">
           {nav}
         </aside>
         {drawerOpen && (
