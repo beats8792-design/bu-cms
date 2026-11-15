@@ -12,7 +12,8 @@
     "e2e": "playwright test",
     "db:setup": "tsx scripts/db-setup.ts",
     "adm": "tsx scripts/create-admin.ts",
-    "seed": "tsx scripts/seed-demo.ts"
+    "seed": "tsx scripts/seed-demo.ts",
+    "seed:test": "tsx scripts/seed-test.ts"
   },
   "type": "module",
   "dependencies": {
