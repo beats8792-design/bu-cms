@@ -98,7 +98,7 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
         </div>
       </header>
 
-      <div className="mx-auto flex w-full max-w-7xl flex-1">
+      <div className="flex w-full flex-1">
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface md:block">
           {nav}
         </aside>
