@@ -44,7 +44,7 @@ export function buttonClass(
   return `${base} ${VARIANT[variant]} ${SIZE[size]}`;
 }
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends React.ComponentProps<"button"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
 }

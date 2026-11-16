@@ -11,6 +11,7 @@ import { formatSlot, type Department, type Semester } from "@/modules/academic/s
 import { CourseForm } from "@/modules/academic/components/course-form";
 import { TeacherPicker } from "@/modules/academic/components/teacher-picker";
 import { DropButton, EnrollButton, ManualEnrollForm } from "@/modules/academic/components/enroll-buttons";
+import { ModalButton } from "@/components/ui";
 import { listMaterials } from "@/modules/materials/service";
 import { formatBytes } from "@/modules/materials/schema";
 import { MaterialUploader, MaterialVisibilityToggle } from "@/modules/materials/components/material-uploader";
@@ -251,12 +252,15 @@ export default async function CoursePage({ params }: Props) {
             </ul>
           )}
           {canManage || isStudentishEnrolled ? (
-            <details className="mt-4">
-              <summary className="cursor-pointer text-sm font-medium text-primary">Share a note</summary>
-              <div className="mt-3">
+            <div className="mt-4">
+              <ModalButton
+                label="Share a note"
+                title="Share a note"
+                description="Upload a PDF or image note for everyone in this course."
+              >
                 <NoteUploader courseId={course.id} />
-              </div>
-            </details>
+              </ModalButton>
+            </div>
           ) : null}
         </section>
       ) : null}

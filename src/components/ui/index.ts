@@ -8,3 +8,4 @@ export { EmptyState } from "./empty";
 export { PageHeader } from "./page-header";
 export { inputClass, compactInputClass, selectClass, textareaClass, Field } from "./field";
 export { ConfirmButton } from "./confirm-button";
+export { ModalButton } from "./modal";

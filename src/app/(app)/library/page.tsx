@@ -6,7 +6,7 @@ import { listCourses } from "@/modules/academic/courses";
 import { listResources } from "@/modules/collab/library";
 import { kindLabel, RESOURCE_KINDS, type ResourceKind } from "@/modules/collab/schema";
 import { LibraryUploader, ResourceActions } from "@/modules/collab/components/collab-forms";
-import { EmptyState, inputClass, buttonClass } from "@/components/ui";
+import { buttonClass, EmptyState, inputClass, ModalButton } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Library · UCMS" };
 
@@ -117,16 +117,20 @@ export default async function LibraryPage({ searchParams }: Props) {
       </form>
 
       {/* Upload (every active role — seniors included) */}
-      <details className="mt-4">
-        <summary className="cursor-pointer text-sm font-medium text-primary">Contribute a resource</summary>
-        <div className="mt-3">
+      <div className="mt-4">
+        <ModalButton
+          label="Contribute a resource"
+          title="Contribute a resource"
+          description="Past papers, guides and other shared files — visible to everyone after upload."
+          size="lg"
+        >
           <LibraryUploader
             departments={departments.map((d) => ({ id: d.id, code: d.code, name: d.name }))}
             courses={courses.map((c) => ({ id: c.id, code: c.code, title: c.title }))}
             semesters={semesters.map((s) => ({ id: s.id, label: `${s.term} ${s.academicYear}` }))}
           />
-        </div>
-      </details>
+        </ModalButton>
+      </div>
 
       {/* Results */}
       {resources.length === 0 ? (

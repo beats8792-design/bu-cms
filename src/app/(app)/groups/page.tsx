@@ -5,7 +5,7 @@ import { myCourseIds } from "@/modules/academic/enrollment";
 import { listCourses } from "@/modules/academic/courses";
 import { listGroups } from "@/modules/collab/groups";
 import { GroupCreator } from "@/modules/collab/components/collab-forms";
-import { Badge, EmptyState, Notice } from "@/components/ui";
+import { Badge, EmptyState, ModalButton, Notice } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Study groups · UCMS" };
 
@@ -47,9 +47,12 @@ export default async function GroupsPage() {
       </p>
 
       {canCreate ? (
-        <details className="mt-4">
-          <summary className="cursor-pointer text-sm font-medium text-primary">Create a group</summary>
-          <div className="mt-3">
+        <div className="mt-4">
+          <ModalButton
+            label="Create a group"
+            title="Create a group"
+            description="Groups are created per course — pick the course and name the group."
+          >
             {creatorCourses.length > 0 ? (
               <GroupCreator courses={creatorCourses.map((c) => ({ id: c.id, code: c.code, title: c.title }))} />
             ) : (
@@ -57,8 +60,8 @@ export default async function GroupsPage() {
                 Enroll in a course first — groups are created per course.
               </Notice>
             )}
-          </div>
-        </details>
+          </ModalButton>
+        </div>
       ) : null}
 
       {visible.length === 0 ? (
