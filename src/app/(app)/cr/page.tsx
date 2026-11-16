@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui";
  * schedule, low-attendance roster summary, recent announcements + composer
  * (UCM-R2 lives on /announcements; linked here).
  */
-export const metadata: Metadata = { title: "CR dashboard · UCMS" };
+export const metadata: Metadata = { title: "CR dashboard" };
 
 export const instant = false;
 

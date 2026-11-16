@@ -6,7 +6,7 @@ import type { NotificationType } from "@/modules/notifications/schema";
 import { PageHeader, Badge, EmptyState } from "@/components/ui";
 import { MarkAllReadButton } from "@/modules/notifications/components/mark-all-read";
 
-export const metadata: Metadata = { title: "Notifications · UCMS" };
+export const metadata: Metadata = { title: "Notifications" };
 
 export const instant = false;
 

@@ -17,8 +17,8 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Jazbah UCMS",
-    template: "%s · Jazbah UCMS",
+    default: "BU-CMS",
+    template: "%s · BU-CMS",
   },
   description:
     "University Course Management System — courses, materials, assignments, attendance, marks and results in one place.",

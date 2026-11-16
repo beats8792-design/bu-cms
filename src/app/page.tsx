@@ -4,7 +4,7 @@ export default function LandingPage() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-4xl flex-col px-6">
       <header className="flex h-14 shrink-0 items-center justify-between">
-        <span className="font-display text-base font-semibold text-primary">Jazbah UCMS</span>
+        <span className="font-display text-base font-semibold text-primary">BU-CMS</span>
         <Link href="/login" className="text-sm font-medium text-primary hover:underline">
           Sign in
         </Link>

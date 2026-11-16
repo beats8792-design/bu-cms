@@ -1,4 +1,4 @@
-# Jazbah UCMS — Admin Playbook
+# BU-CMS - Admin Playbook
 
 Operating guide for the system owner / admin staff. Covers day-to-day
 administration (users, courses, analytics, data quality, audit) and the

@@ -15,7 +15,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   await params;
-  return { title: "Group · UCMS" };
+  return { title: "Group" };
 }
 
 export default async function GroupPage({ params }: Props) {

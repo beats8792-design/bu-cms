@@ -94,7 +94,7 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
             Menu
           </button>
           <Link href="/dashboard" className="font-display text-base font-semibold text-primary">
-            Jazbah UCMS
+            BU-CMS
           </Link>
         </div>
         <div className="flex items-center gap-3">

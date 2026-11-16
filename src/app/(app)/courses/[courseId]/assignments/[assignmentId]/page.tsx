@@ -32,7 +32,7 @@ const STATUS_LABEL = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { assignmentId } = await params;
-  return { title: `Assignment ${assignmentId.slice(-6)} · UCMS` };
+  return { title: `Assignment ${assignmentId.slice(-6)}` };
 }
 
 export default async function AssignmentPage({ params }: Props) {

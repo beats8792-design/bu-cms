@@ -7,7 +7,7 @@ import { listGroups } from "@/modules/collab/groups";
 import { GroupCreator } from "@/modules/collab/components/collab-forms";
 import { Badge, EmptyState, ModalButton, Notice } from "@/components/ui";
 
-export const metadata: Metadata = { title: "Study groups · UCMS" };
+export const metadata: Metadata = { title: "Study groups" };
 
 export const instant = false;
 

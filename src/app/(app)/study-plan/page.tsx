@@ -5,7 +5,7 @@ import { aiConfigured } from "@/modules/ai/gemini";
 import { PlanBoard, PlanGenerator } from "@/modules/ai/components/ai-forms";
 import { PageHeader, Notice } from "@/components/ui";
 
-export const metadata: Metadata = { title: "Study plan · UCMS" };
+export const metadata: Metadata = { title: "Study plan" };
 
 export const instant = false;
 

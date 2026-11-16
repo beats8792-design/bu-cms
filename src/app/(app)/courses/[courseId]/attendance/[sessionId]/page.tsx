@@ -20,7 +20,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { sessionId } = await params;
-  return { title: `Attendance ${sessionId.slice(-6)} · UCMS` };
+  return { title: `Attendance ${sessionId.slice(-6)}` };
 }
 
 export default async function AttendanceSessionPage({ params }: Props) {

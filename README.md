@@ -1,4 +1,4 @@
-# Jazbah UCMS
+# BU-CMS
 
 University Course Management System for Bangladeshi universities — courses, enrollment,
 materials, assignments, marks & results, attendance, announcements, collaboration

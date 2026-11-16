@@ -8,7 +8,7 @@ import { kindLabel, RESOURCE_KINDS, type ResourceKind } from "@/modules/collab/s
 import { LibraryUploader, ResourceActions } from "@/modules/collab/components/collab-forms";
 import { buttonClass, EmptyState, inputClass, ModalButton } from "@/components/ui";
 
-export const metadata: Metadata = { title: "Library · UCMS" };
+export const metadata: Metadata = { title: "Library" };
 
 export const instant = false;
 

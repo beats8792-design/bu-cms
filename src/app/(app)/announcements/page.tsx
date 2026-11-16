@@ -11,7 +11,7 @@ import {
   PinButton,
 } from "@/modules/announcements/components/announcement-forms";
 
-export const metadata: Metadata = { title: "Announcements · UCMS" };
+export const metadata: Metadata = { title: "Announcements" };
 
 export const instant = false;
 

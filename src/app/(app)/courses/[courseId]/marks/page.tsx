@@ -15,7 +15,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { courseId } = await params;
-  return { title: `Marks ${courseId.slice(-6)} · UCMS` };
+  return { title: `Marks ${courseId.slice(-6)}` };
 }
 
 export default async function MarksPage({ params }: Props) {

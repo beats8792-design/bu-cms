@@ -32,7 +32,7 @@ function createAuth() {
         sendResetPassword: async ({ user, url }) => {
           await sendEmail({
             to: user.email,
-            subject: "Reset your Jazbah UCMS password",
+            subject: "Reset your BU-CMS password",
             html: resetPasswordHtml(url),
           });
         },
@@ -41,7 +41,7 @@ function createAuth() {
         sendVerificationEmail: async ({ user, url }) => {
           await sendEmail({
             to: user.email,
-            subject: "Verify your Jazbah UCMS account",
+            subject: "Verify your BU-CMS account",
             html: verificationHtml(url),
           });
         },
@@ -94,7 +94,7 @@ function createAuth() {
   );
 }
 
-export const APP_NAME = "Jazbah UCMS";
+export const APP_NAME = "BU-CMS";
 
 const shell = (title: string, body: string) => `
   <div style="font-family:Arial,Helvetica,sans-serif;max-width:520px;margin:auto;border:1px solid #e4e1d8;border-radius:8px">

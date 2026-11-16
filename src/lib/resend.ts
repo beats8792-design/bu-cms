@@ -6,7 +6,7 @@ import { serverEnv } from "@/lib/env";
  * Brain/MEMORY.md and web-app/.env.example notes.
  */
 
-export const DEFAULT_FROM = "Jazbah UCMS <onboarding@resend.dev>";
+export const DEFAULT_FROM = "BU-CMS <onboarding@resend.dev>";
 
 export interface SendEmailArgs {
   to: string;
