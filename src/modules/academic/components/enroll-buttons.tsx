@@ -2,7 +2,7 @@
 
 import { useActionState, useRef } from "react";
 import { dropAction, enrollAction, manualEnrollAction, type FormState } from "@/modules/academic/actions";
-import { Button, ConfirmButton, Notice, compactInputClass } from "@/components/ui";
+import { Button, ConfirmButton, Notice } from "@/components/ui";
 
 export function EnrollButton({ courseId, disabled, label }: { courseId: string; disabled?: boolean; label?: string }) {
   const [state, formAction, pending] = useActionState(enrollAction, {} as FormState);
@@ -46,17 +46,27 @@ export function DropButton({ courseId, userId, small }: { courseId: string; user
 export function ManualEnrollForm({ courseId }: { courseId: string }) {
   const [state, formAction, pending] = useActionState(manualEnrollAction, {} as FormState);
   return (
-    <form action={formAction} className="flex flex-wrap items-end gap-2">
+    <form action={formAction} className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-surface p-4">
       {state.error ? <Notice tone="danger" className="w-full">{state.error}</Notice> : null}
       {state.ok ? <Notice tone="success" className="w-full">Student enrolled.</Notice> : null}
       <input type="hidden" name="courseId" value={courseId} />
       <label className="text-sm font-medium">
         Student email
-        <input name="email" type="email" required className={`mt-1 ${compactInputClass}`} />
+        <input
+          name="email"
+          type="email"
+          required
+          placeholder="name@versity.edu"
+          className="mt-1 block w-64 rounded-lg border border-border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+        />
       </label>
       <label className="text-sm font-medium">
         Section
-        <input name="section" defaultValue="A" className={`mt-1 w-20 ${compactInputClass}`} />
+        <input
+          name="section"
+          defaultValue="A"
+          className="mt-1 block w-20 rounded-lg border border-border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+        />
       </label>
       <Button type="submit" disabled={pending} aria-busy={pending || undefined}>
         {pending ? "Enrolling…" : "Enroll student"}

@@ -368,16 +368,40 @@ export default async function CoursePage({ params }: Props) {
 
       {/* Management: manual enroll, edit course, assign teachers */}
       {canManage ? (
-        <section className="mt-10 flex flex-col gap-6">
+        <section className="mt-10 flex flex-col gap-4">
           <h2 className="font-display text-xl font-semibold">Manage course</h2>
-          <ManualEnrollForm courseId={course.id} />
-          <CourseForm
-            course={course}
-            departments={departments}
-            semesters={await listSemesters(session)}
-            teacherScoped={isTeacherOfCourse}
-          />
-          {isAdmin ? <TeacherPicker courseId={course.id} teachers={teachers} assigned={course.teacherIds} /> : null}
+          <div>
+            <h3 className="text-sm font-semibold text-muted">Manual enrollment</h3>
+            <p className="mt-0.5 text-xs text-muted">
+              Enroll a student by email if they could not self-enroll during the open window.
+            </p>
+            <div className="mt-2">
+              <ManualEnrollForm courseId={course.id} />
+            </div>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-muted">Course settings</h3>
+            <p className="mt-0.5 text-xs text-muted">
+              Details, schedule slots and visibility for this course.
+            </p>
+            <div className="mt-2">
+              <CourseForm
+                course={course}
+                departments={departments}
+                semesters={await listSemesters(session)}
+                teacherScoped={isTeacherOfCourse}
+              />
+            </div>
+          </div>
+          {isAdmin ? (
+            <div>
+              <h3 className="text-sm font-semibold text-muted">Teachers</h3>
+              <p className="mt-0.5 text-xs text-muted">Who can manage materials, assignments, attendance and marks.</p>
+              <div className="mt-2">
+                <TeacherPicker courseId={course.id} teachers={teachers} assigned={course.teacherIds} />
+              </div>
+            </div>
+          ) : null}
         </section>
       ) : null}
     </div>

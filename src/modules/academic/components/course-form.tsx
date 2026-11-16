@@ -39,7 +39,9 @@ export function CourseForm({
 
   if (!showForm) {
     return (
-      <Button onClick={() => setShowForm(true)}>Add course</Button>
+      <Button onClick={() => setShowForm(true)} className="self-start">
+        Add course
+      </Button>
     );
   }
 
