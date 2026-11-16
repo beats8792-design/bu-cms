@@ -94,7 +94,7 @@ export default async function CoursePage({ params }: Props) {
     : [];
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-6xl">
       <p className="font-mono text-xs text-muted">
         {course.code} · {course.type} · {course.credits} credits
         {department ? ` · ${department.code}` : ""}
