@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import {
   askAction,
   clearThreadAction,
@@ -13,24 +13,19 @@ import {
   type AiFormState,
 } from "@/modules/ai/actions";
 import { QUIZ_COUNTS, WEEKDAY, type AssistantMessage, type QuizDraft, type StudyPlan } from "@/modules/ai/schema";
+import { Badge, Button, ConfirmButton, Notice, textareaClass } from "@/components/ui";
 
 const EMPTY = {} as AiFormState;
 
 function Banner({ state }: { state: AiFormState }) {
   if (state.error) {
-    return (
-      <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
-        {state.error}
-      </p>
-    );
+    return <Notice tone="danger">{state.error}</Notice>;
   }
   if (state.info) {
-    return <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">{state.info}</p>;
+    return <Notice tone="info">{state.info}</Notice>;
   }
   return null;
 }
-
-const BTN = "rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60";
 
 /* ---------------------------------------------------------------- assistant */
 
@@ -38,7 +33,7 @@ export function AskForm({ courseId, secondsLeft }: { courseId: string; secondsLe
   const [state, formAction, pending] = useActionState(askAction, EMPTY);
   return (
     <form action={formAction} className="flex flex-col gap-2">
-      {state.error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
       <input type="hidden" name="courseId" value={courseId} />
       <label className="text-sm font-medium">
         Ask about this course&apos;s materials
@@ -50,12 +45,12 @@ export function AskForm({ courseId, secondsLeft }: { courseId: string; secondsLe
           maxLength={1000}
           disabled={pending}
           placeholder="e.g. Explain the difference between… / What topics should I revise for the quiz?"
-          className="mt-1 w-full rounded-md border border-border px-3 py-2"
+          className={textareaClass}
         />
       </label>
-      <button type="submit" disabled={pending} className={`self-start ${BTN}`}>
+      <Button type="submit" disabled={pending} aria-busy={pending || undefined} className="self-start">
         {pending ? "Thinking…" : secondsLeft > 0 ? `Wait ${secondsLeft}s` : "Ask"}
-      </button>
+      </Button>
       <p role="status" aria-live="polite" className="sr-only">
         {pending ? "Searching course materials and answering…" : ""}
       </p>
@@ -65,15 +60,23 @@ export function AskForm({ courseId, secondsLeft }: { courseId: string; secondsLe
 
 export function ClearThreadButton({ courseId }: { courseId: string }) {
   const [state, formAction, pending] = useActionState(clearThreadAction, EMPTY);
+  const formRef = useRef<HTMLFormElement>(null);
   return (
     <span className="flex items-center gap-2">
-      <form action={formAction} className="inline">
+      <form ref={formRef} action={formAction} className="inline">
         <input type="hidden" name="courseId" value={courseId} />
-        <button type="submit" disabled={pending} className="text-xs text-danger underline">
-          {pending ? "…" : "Clear my thread"}
-        </button>
+        <ConfirmButton
+          confirm="Clear your entire question thread for this course? This cannot be undone."
+          onConfirm={() => formRef.current?.requestSubmit()}
+          pending={pending}
+          busyLabel="Clearing…"
+          variant="dangerLink"
+          size="sm"
+        >
+          Clear my thread
+        </ConfirmButton>
       </form>
-      {state.error ? <span className="text-xs text-danger">{state.error}</span> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
     </span>
   );
 }
@@ -149,12 +152,12 @@ export function QuizGenerator({ courseId }: { courseId: string }) {
           name="topic"
           maxLength={120}
           placeholder="e.g. Recursion, Chapter 4…"
-          className="mt-1 w-64 rounded-md border border-border px-3 py-2"
+          className="mt-1 w-64 rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </label>
       <label className="text-sm font-medium">
         Questions
-        <select name="count" defaultValue="10" className="mt-1 rounded-md border border-border px-3 py-2">
+        <select name="count" defaultValue="10" className="mt-1 rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink focus:outline-none focus:ring-2 focus:ring-primary">
           {QUIZ_COUNTS.map((n) => (
             <option key={n} value={n}>
               {n}
@@ -162,15 +165,15 @@ export function QuizGenerator({ courseId }: { courseId: string }) {
           ))}
         </select>
       </label>
-      <button type="submit" disabled={pending} className={BTN}>
+      <Button type="submit" disabled={pending} aria-busy={pending || undefined} className="self-start">
         {pending ? "Generating…" : "Generate quiz draft"}
-      </button>
+      </Button>
       <p role="status" aria-live="polite" className="sr-only">
         {pending ? "Generating the quiz draft…" : ""}
       </p>
       <div className="w-full">
-        {state.ok ? <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Quiz draft generated — review below.</p> : null}
-        {state.error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p> : null}
+        {state.ok ? <Notice tone="success">Quiz draft generated — review below.</Notice> : null}
+        {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
       </div>
     </form>
   );
@@ -183,29 +186,28 @@ export function QuizReview({ quiz, canDelete }: { quiz: QuizDraft; canDelete: bo
   return (
     <li className="rounded-lg border border-border bg-surface p-4">
       <div className="flex flex-wrap items-center gap-2">
-        <button type="button" onClick={() => setOpen(!open)} className="font-display text-base font-semibold hover:underline">
-          {open ? "▾" : "▸"} {quiz.topic ? quiz.topic : "Mixed topics"} · {quiz.questions.length} questions
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          className="font-display text-base font-semibold hover:underline"
+        >
+          {quiz.topic ? quiz.topic : "Mixed topics"} · {quiz.questions.length} questions
         </button>
         <span className="num text-xs text-muted">
           by {quiz.creatorName} · {quiz.createdAt.slice(0, 16).replace("T", " ")}
         </span>
         {canDelete ? (
-          <form action={delAction} className="ml-auto inline">
-            <input type="hidden" name="id" value={quiz.id} />
-            <input type="hidden" name="courseId" value={quiz.courseId} />
-            <button type="submit" disabled={delPending} className="text-xs text-danger underline">
-              {delPending ? "…" : "Delete"}
-            </button>
-          </form>
+          <DeleteQuizButton quizId={quiz.id} courseId={quiz.courseId} action={delAction} pending={delPending} error={delState.error} />
         ) : null}
       </div>
-      {delState.error ? <p className="mt-1 text-xs text-danger">{delState.error}</p> : null}
+      {delState.error ? <Notice tone="danger">{delState.error}</Notice> : null}
       {open ? (
         <div className="mt-3">
           <p className="mb-2">
-            <button type="button" onClick={() => setReveal(!reveal)} className="rounded-md border border-primary px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary-soft">
+            <Button variant="outline" size="sm" onClick={() => setReveal(!reveal)} aria-expanded={reveal}>
               {reveal ? "Hide answer key" : "Show answer key"}
-            </button>
+            </Button>
           </p>
           <ol className="flex flex-col gap-3">
             {quiz.questions.map((q, i) => (
@@ -217,7 +219,7 @@ export function QuizReview({ quiz, canDelete }: { quiz: QuizDraft; canDelete: bo
                   {q.options.map((opt, oi) => (
                     <li key={oi} className={reveal && oi === q.answerIndex ? "font-semibold text-primary-hover" : ""}>
                       {String.fromCharCode(65 + oi)}. {opt}
-                      {reveal && oi === q.answerIndex ? " ✓" : ""}
+                      {reveal && oi === q.answerIndex ? " (answer)" : ""}
                     </li>
                   ))}
                 </ul>
@@ -231,17 +233,52 @@ export function QuizReview({ quiz, canDelete }: { quiz: QuizDraft; canDelete: bo
   );
 }
 
+function DeleteQuizButton({
+  quizId,
+  courseId,
+  action,
+  pending,
+  error,
+}: {
+  quizId: string;
+  courseId: string;
+  action: (formData: FormData) => void;
+  pending: boolean;
+  error?: string | null;
+}) {
+  const formRef = useRef<HTMLFormElement>(null);
+  return (
+    <>
+      <form ref={formRef} action={action} className="ml-auto inline">
+        <input type="hidden" name="id" value={quizId} />
+        <input type="hidden" name="courseId" value={courseId} />
+        <ConfirmButton
+          confirm="Delete this quiz draft?"
+          onConfirm={() => formRef.current?.requestSubmit()}
+          pending={pending}
+          busyLabel="Deleting…"
+          variant="dangerLink"
+          size="sm"
+        >
+          Delete
+        </ConfirmButton>
+      </form>
+      {error ? <Notice tone="danger">{error}</Notice> : null}
+    </>
+  );
+}
+
 /* ------------------------------------------------------------------ planner */
 
 export function PlanGenerator({ hasPlan }: { hasPlan: boolean }) {
   const [state, formAction, pending] = useActionState(generatePlanAction, EMPTY);
   return (
     <div className="flex flex-col gap-2">
-      {state.error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
       <form action={formAction}>
-        <button type="submit" disabled={pending} className={BTN}>
+        <Button type="submit" disabled={pending} aria-busy={pending || undefined}>
           {pending ? "Planning…" : hasPlan ? "Regenerate this week's plan" : "Build my weekly plan"}
-        </button>
+        </Button>
       </form>
       {pending ? (
         <p role="status" aria-live="polite" className="text-xs text-muted">
@@ -287,6 +324,8 @@ export function PlanBoard({ plan }: { plan: StudyPlan }) {
                       <button
                         type="submit"
                         disabled={pending}
+                        role="checkbox"
+                        aria-checked={item.done}
                         aria-label={item.done ? "Mark not done" : "Mark done"}
                         className={`flex h-5 w-5 items-center justify-center rounded border ${
                           item.done ? "border-primary bg-primary text-white" : "border-border"
@@ -297,9 +336,7 @@ export function PlanBoard({ plan }: { plan: StudyPlan }) {
                     </form>
                     <span className={item.done ? "line-through" : ""}>{item.title}</span>
                     {item.courseCode ? (
-                      <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">
-                        {item.courseCode}
-                      </span>
+                      <Badge tone="info">{item.courseCode}</Badge>
                     ) : null}
                     <span className="num ml-auto text-xs text-muted">{item.minutes} min</span>
                     {item.focus ? <p className="w-full pl-7 text-xs text-muted">{item.focus}</p> : null}

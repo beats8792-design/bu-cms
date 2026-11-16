@@ -3,6 +3,7 @@ import { appGate } from "@/modules/auth/session";
 import { listDepartments } from "@/modules/academic/departments";
 import { listAnnouncements, composableCourses } from "@/modules/announcements/service";
 import { scopeLabel } from "@/modules/announcements/schema";
+import { Badge, EmptyState } from "@/components/ui";
 import {
   AnnouncementComposer,
   AnnouncementEditForm,
@@ -57,9 +58,11 @@ export default async function AnnouncementsPage() {
       ) : null}
 
       {items.length === 0 ? (
-        <p className="mt-6 text-sm text-muted">
-          No announcements yet — university, department, course and section posts will appear here.
-        </p>
+        <div className="mt-6">
+          <EmptyState title="No announcements yet">
+            University, department, course and section posts will appear here.
+          </EmptyState>
+        </div>
       ) : (
         <ul className="mt-6 flex flex-col gap-3">
           {items.map((a) => {
@@ -67,23 +70,21 @@ export default async function AnnouncementsPage() {
             return (
               <li key={a.id} className={`rounded-lg border border-border bg-surface p-4 ${a.pinned ? "border-l-4 border-l-primary" : ""}`}>
                 <div className="flex flex-wrap items-center gap-2">
-                  {a.pinned ? <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">pinned</span> : null}
-                  <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">
-                    {scopeLabel(a)}
-                  </span>
+                  {a.pinned ? <Badge tone="info">pinned</Badge> : null}
+                  <Badge tone="info">{scopeLabel(a)}</Badge>
                   <h2 className="font-display text-base font-semibold">{a.title}</h2>
                 </div>
                 <p className="mt-2 whitespace-pre-line text-sm">{a.body}</p>
                 <p className="num mt-2 text-xs text-muted">
-                  {a.authorName} · {a.createdAt.slice(0, 16).replace("T", " ")}
-                  {a.updatedAt > a.createdAt ? ` · edited ${a.updatedAt.slice(0, 16).replace("T", " ")}` : ""}
+                  {a.authorName} · {a.createdAt.slice(0, 16).replace("T", " ")} (UTC)
+                  {a.updatedAt > a.createdAt ? ` · edited ${a.updatedAt.slice(0, 16).replace("T", " ")} (UTC)` : ""}
                 </p>
                 {canManage ? (
-                  <p className="mt-2 flex gap-3">
+                  <div className="mt-2 flex flex-wrap gap-2">
                     <PinButton id={a.id} pinned={a.pinned} />
                     <AnnouncementEditForm announcement={a} />
                     <DeleteAnnouncementButton id={a.id} />
-                  </p>
+                  </div>
                 ) : null}
               </li>
             );

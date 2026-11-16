@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { appGate } from "@/modules/auth/session";
 import { listActivities, LOG_ACTIONS } from "@/modules/admin/activity";
+import { Badge, Button, ButtonLink, EmptyState } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Admin · Activity log" };
 
@@ -41,7 +42,7 @@ export default async function LogsPage({ searchParams }: Props) {
       <form method="get" className="mt-4 flex flex-wrap items-end gap-3 rounded-lg border border-border bg-surface p-4">
         <label className="text-sm font-medium">
           Action
-          <select name="action" defaultValue={action} className="mt-1 w-52 rounded-md border border-border px-3 py-2">
+          <select name="action" defaultValue={action} className="mt-1 w-52 rounded-lg border border-border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
             <option value="">All actions</option>
             {LOG_ACTIONS.map((a) => (
               <option key={a} value={a}>
@@ -52,21 +53,36 @@ export default async function LogsPage({ searchParams }: Props) {
         </label>
         <label className="text-sm font-medium">
           Search actor / target
-          <input name="search" defaultValue={search} className="mt-1 w-64 rounded-md border border-border px-3 py-2" />
+          <input name="search" defaultValue={search} className="mt-1 w-64 rounded-lg border border-border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
         </label>
-        <button type="submit" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover">
+        <Button type="submit" variant="primary">
           Filter
-        </button>
-        <a
-          href={`/api/admin/reports/activity-logs${action ? `?action=${encodeURIComponent(action)}` : ""}`}
-          className="rounded-md border border-border px-3 py-2 text-sm hover:bg-primary-soft"
+        </Button>
+        <ButtonLink
+          href={`/api/admin/reports/activity-logs?${new URLSearchParams({
+            ...(action ? { action } : {}),
+            ...(search ? { search } : {}),
+          }).toString()}`}
+          variant="secondary"
+          size="sm"
         >
-          ⬇ Export CSV
-        </a>
+          Export CSV
+        </ButtonLink>
       </form>
 
       {entries.length === 0 ? (
-        <p className="mt-6 text-sm text-muted">No matching entries.</p>
+        <div className="mt-6">
+          <EmptyState
+            title="No matching entries"
+            action={
+              <ButtonLink href="/admin/logs" variant="secondary">
+                Clear filters
+              </ButtonLink>
+            }
+          >
+            Try a different action or search term.
+          </EmptyState>
+        </div>
       ) : (
         <table className="mt-4 w-full border-collapse text-sm">
           <caption className="sr-only">Activity log entries</caption>
@@ -88,7 +104,7 @@ export default async function LogsPage({ searchParams }: Props) {
                   {e.actorEmail ? <span className="block text-xs text-muted">{e.actorEmail}</span> : null}
                 </td>
                 <td className="py-2 pr-3">
-                  <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">{e.action}</span>
+                  <Badge tone="info">{e.action}</Badge>
                 </td>
                 <td className="py-2 pr-3">{e.target}</td>
                 <td className="py-2 text-muted">{e.detail}</td>
@@ -102,7 +118,7 @@ export default async function LogsPage({ searchParams }: Props) {
         <p className="mt-4 flex items-center gap-3 text-sm">
           {page > 1 ? (
             <Link href={qs({ page: String(page - 1) })} className="underline">
-              ← Newer
+              Newer
             </Link>
           ) : null}
           <span className="num text-muted">
@@ -110,7 +126,7 @@ export default async function LogsPage({ searchParams }: Props) {
           </span>
           {page < pages ? (
             <Link href={qs({ page: String(page + 1) })} className="underline">
-              Older →
+              Older
             </Link>
           ) : null}
         </p>

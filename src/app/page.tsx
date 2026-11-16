@@ -3,8 +3,11 @@ import Link from "next/link";
 export default function LandingPage() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-4xl flex-col px-6">
-      <header className="flex h-14 shrink-0 items-center">
+      <header className="flex h-14 shrink-0 items-center justify-between">
         <span className="font-display text-base font-semibold text-primary">Jazbah UCMS</span>
+        <Link href="/login" className="text-sm font-medium text-primary hover:underline">
+          Sign in
+        </Link>
       </header>
 
       <main className="flex flex-1 flex-col justify-center py-12">
@@ -17,16 +20,16 @@ export default function LandingPage() {
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link
-            href="/dashboard"
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+            href="/register"
+            className="inline-flex h-10 items-center rounded-md bg-primary px-4 text-sm font-medium text-white transition-colors duration-150 hover:bg-primary-hover"
           >
-            Open the app
+            Create an account
           </Link>
           <Link
-            href="/dashboard"
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium text-ink hover:bg-primary-soft"
+            href="/login"
+            className="inline-flex h-10 items-center rounded-md border border-border bg-surface px-4 text-sm font-medium text-ink transition-colors duration-150 hover:bg-primary-soft"
           >
-            Sign in (Phase 1)
+            Sign in
           </Link>
         </div>
 
@@ -41,7 +44,7 @@ export default function LandingPage() {
               className="rounded-lg border border-border bg-surface p-4"
             >
               <dt className="text-muted">{label}</dt>
-              <dd className="mt-1 font-display text-lg font-semibold">{stat}</dd>
+              <dd className="num mt-1 font-display text-lg font-semibold">{stat}</dd>
             </div>
           ))}
         </dl>

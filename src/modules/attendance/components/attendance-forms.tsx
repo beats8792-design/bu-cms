@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import {
   closeSessionAction,
   openSessionAction,
@@ -9,6 +9,7 @@ import {
   type AttendanceFormState,
 } from "@/modules/attendance/actions";
 import type { AttendanceRecord } from "@/modules/attendance/schema";
+import { Button, ConfirmButton, Notice, inputClass, selectClass } from "@/components/ui";
 
 /** UCM-F15: open a session (course + section + Dhaka date + topic). */
 export function OpenSessionForm({
@@ -24,17 +25,15 @@ export function OpenSessionForm({
 
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-surface p-4">
-      {state.error ? (
-        <p role="alert" className="w-full rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
-      ) : null}
+      {state.error ? <Notice tone="danger" className="w-full">{state.error}</Notice> : null}
       <input type="hidden" name="courseId" value={courseId} />
       <label className="text-sm font-medium">
         Date <span className="text-muted">(Asia/Dhaka)</span>
-        <input type="date" name="date" required defaultValue={today} className="mt-1 block rounded-md border border-border px-3 py-2" />
+        <input type="date" name="date" required defaultValue={today} className={`mt-1 block ${inputClass}`} />
       </label>
       <label className="text-sm font-medium">
         Section
-        <select name="section" defaultValue="A" className="mt-1 block rounded-md border border-border px-3 py-2">
+        <select name="section" defaultValue="A" className={`mt-1 block ${selectClass}`}>
           {sections.map((s) => (
             <option key={s} value={s}>
               {s}
@@ -44,15 +43,11 @@ export function OpenSessionForm({
       </label>
       <label className="min-w-48 flex-1 text-sm font-medium">
         Topic <span className="text-muted">(optional)</span>
-        <input name="topic" placeholder="e.g. Chapter 4 — Joins" className="mt-1 block w-full rounded-md border border-border px-3 py-2" />
+        <input name="topic" placeholder="e.g. Chapter 4 — Joins" className={`mt-1 block w-full ${inputClass}`} />
       </label>
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
-      >
+      <Button type="submit" disabled={pending} aria-busy={pending || undefined}>
         {pending ? "Opening…" : "Open session"}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -77,10 +72,8 @@ export function RosterForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
-      {state.error ? (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
-      ) : null}
-      {state.ok ? <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Attendance saved.</p> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Attendance saved.</Notice> : null}
       <input type="hidden" name="sessionId" value={sessionId} />
       <input type="hidden" name="courseId" value={courseId} />
 
@@ -123,13 +116,9 @@ export function RosterForm({
       </table>
 
       {editable ? (
-        <button
-          type="submit"
-          disabled={pending}
-          className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
-        >
+        <Button type="submit" disabled={pending} aria-busy={pending || undefined} className="self-start">
           {pending ? "Saving…" : "Save attendance"}
-        </button>
+        </Button>
       ) : (
         <p className="text-sm text-muted">This session is closed — attendance is frozen.</p>
       )}
@@ -148,19 +137,35 @@ export function CloseReopenButton({
   closed: boolean;
 }) {
   const [state, formAction, pending] = useActionState(closeSessionAction, {} as AttendanceFormState);
+  const formRef = useRef<HTMLFormElement>(null);
   return (
-    <form action={formAction} className="inline">
+    <form ref={formRef} action={formAction} className="inline-flex flex-col gap-2">
       <input type="hidden" name="sessionId" value={sessionId} />
       <input type="hidden" name="courseId" value={courseId} />
       <input type="hidden" name="closed" value={closed ? "false" : "true"} />
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md border border-border px-3 py-1 text-xs font-medium hover:bg-primary-soft disabled:opacity-60"
-      >
-        {pending ? "…" : closed ? "Reopen" : "Close session"}
-      </button>
-      {state.error ? <span className="ml-2 text-xs text-danger">{state.error}</span> : null}
+      {closed ? (
+        <Button
+          type="submit"
+          variant="secondary"
+          size="sm"
+          disabled={pending}
+          aria-busy={pending || undefined}
+        >
+          {pending ? "Reopening…" : "Reopen"}
+        </Button>
+      ) : (
+        <ConfirmButton
+          confirm="Close this session? The roster freezes and can no longer be edited."
+          onConfirm={() => formRef.current?.requestSubmit()}
+          pending={pending}
+          busyLabel="Closing…"
+          variant="secondary"
+          size="sm"
+        >
+          Close session
+        </ConfirmButton>
+      )}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
     </form>
   );
 }
@@ -170,8 +175,8 @@ export function ThresholdForm({ courseId, current }: { courseId: string; current
   const [state, formAction, pending] = useActionState(setThresholdAction, {} as AttendanceFormState);
   return (
     <form action={formAction} className="flex items-end gap-2">
-      {state.error ? <p className="text-xs text-danger">{state.error}</p> : null}
-      {state.ok ? <p className="text-xs text-primary-hover">Saved.</p> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Saved.</Notice> : null}
       <input type="hidden" name="courseId" value={courseId} />
       <label className="text-sm font-medium">
         Warning threshold %
@@ -182,16 +187,18 @@ export function ThresholdForm({ courseId, current }: { courseId: string; current
           max="100"
           required
           defaultValue={current}
-          className="num mt-1 block w-24 rounded-md border border-border px-3 py-2"
+          className="num mt-1 block w-24 rounded-lg border border-border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </label>
-      <button
+      <Button
         type="submit"
+        variant="secondary"
+        size="md"
         disabled={pending}
-        className="rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-primary-soft disabled:opacity-60"
+        aria-busy={pending || undefined}
       >
         {pending ? "Saving…" : "Set"}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createDepartmentAction, updateDepartmentAction, type FormState } from "@/modules/academic/actions";
 import { FormAlert, Field, inputClass, SubmitButton, useAcademicForm } from "@/modules/academic/form-kit";
+import { Button } from "@/components/ui";
 import type { Department } from "@/modules/academic/schema";
 
 export function DepartmentForm({ department }: { department?: Department }) {
@@ -14,13 +15,7 @@ export function DepartmentForm({ department }: { department?: Department }) {
 
   if (!showForm) {
     return (
-      <button
-        type="button"
-        onClick={() => setShowForm(true)}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-      >
-        Add department
-      </button>
+      <Button onClick={() => setShowForm(true)}>Add department</Button>
     );
   }
 
@@ -46,13 +41,9 @@ export function DepartmentForm({ department }: { department?: Department }) {
       <div className="flex gap-2">
         <SubmitButton pending={pending} label={editing ? "Save changes" : "Create department"} />
         {editing ? (
-          <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-primary-soft"
-          >
+          <Button variant="secondary" size="md" onClick={() => setShowForm(false)}>
             Cancel
-          </button>
+          </Button>
         ) : null}
       </div>
     </form>

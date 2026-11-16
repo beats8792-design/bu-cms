@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@/modules/auth/auth-client";
+import { Button, ButtonLink, Notice, inputClass } from "@/components/ui";
 
 /** Set a new password using the token from the emailed reset link. */
 export function ResetForm() {
@@ -28,24 +30,33 @@ export function ResetForm() {
 
   if (done) {
     return (
-      <div className="text-sm">
-        <p className="rounded-md border border-primary-soft bg-primary-soft px-3 py-2">
+      <div className="flex flex-col gap-4 text-sm">
+        <Notice tone="success">
           Password updated. You can sign in with your new password.
-        </p>
-        <a href="/login" className="mt-4 inline-block text-primary underline">
+        </Notice>
+        <Link href="/login" className="inline-block text-primary underline">
           Sign in
-        </a>
+        </Link>
       </div>
     );
   }
 
   if (!token) {
-    return <p className="text-sm text-danger">This link is missing its token. Request a new reset email.</p>;
+    return (
+      <div className="flex flex-col gap-4">
+        <Notice tone="danger">This reset link is missing its token.</Notice>
+        <div>
+          <ButtonLink href="/forgot-password" variant="primary" size="sm">
+            Request a new link
+          </ButtonLink>
+        </div>
+      </div>
+    );
   }
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
-      {error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p> : null}
+      {error ? <Notice tone="danger">{error}</Notice> : null}
       <label className="text-sm font-medium">
         New password
         <input
@@ -54,17 +65,18 @@ export function ResetForm() {
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 w-full rounded-md border border-border px-3 py-2"
+          className={inputClass}
           autoComplete="new-password"
         />
       </label>
-      <button
+      <Button
         type="submit"
+        variant="primary"
         disabled={loading}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
+        aria-busy={loading || undefined}
       >
         {loading ? "Saving…" : "Set new password"}
-      </button>
+      </Button>
     </form>
   );
 }

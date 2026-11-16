@@ -5,6 +5,7 @@ import { appGate } from "@/modules/auth/session";
 import { getCourse } from "@/modules/academic/courses";
 import { marksGrid, studentResult } from "@/modules/marks/service";
 import { SchemaEditor, GridRow, PublishToggle } from "@/modules/marks/components/marks-forms";
+import { Notice } from "@/components/ui";
 
 export const instant = false;
 
@@ -66,7 +67,7 @@ async function ManagerView({ courseId }: { courseId: string }) {
   return (
     <div className="mt-6 flex flex-col gap-8">
       <section>
-        <h2 className="font-display text-lg font-semibold">Assessment plan</h2>
+        <h2 className="font-display text-xl font-semibold">Assessment plan</h2>
         <p className="mt-1 text-xs text-muted">
           Keys holding marks are locked (renaming would orphan them). Clear marks to change them.
         </p>
@@ -81,7 +82,7 @@ async function ManagerView({ courseId }: { courseId: string }) {
 
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-lg font-semibold">
+          <h2 className="font-display text-xl font-semibold">
             Marks grid ({grid.rows.length} students)
             {grid.schema.published ? (
               <span className="ml-3 rounded-full bg-primary-soft px-3 py-1 text-xs font-medium text-primary-hover">
@@ -131,7 +132,7 @@ async function ManagerView({ courseId }: { courseId: string }) {
 
       {grid.audit.length > 0 ? (
         <section>
-          <h2 className="font-display text-lg font-semibold">Audit trail (latest first)</h2>
+          <h2 className="font-display text-xl font-semibold">Audit trail (latest first)</h2>
           <ul className="mt-2 flex flex-col gap-1 text-xs">
             {grid.audit.slice(0, 20).map((a, i) => (
               <li key={i} className="num rounded-md border border-border bg-surface px-3 py-1">
@@ -158,9 +159,7 @@ async function StudentView({ courseId }: { courseId: string }) {
     const message = err instanceof Error ? err.message : "Results are not available yet.";
     return (
       <div className="mt-6">
-        <p role="status" className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">
-          {message}
-        </p>
+        <Notice tone="info">{message}</Notice>
       </div>
     );
   }
@@ -186,7 +185,7 @@ async function StudentView({ courseId }: { courseId: string }) {
       </div>
 
       <section>
-        <h2 className="font-display text-lg font-semibold">Component breakdown</h2>
+        <h2 className="font-display text-xl font-semibold">Component breakdown</h2>
         <ul className="mt-2 flex flex-col gap-3 text-sm">
           {result.schema.components.map((c) => {
             const myPct = result.mine[c.key];

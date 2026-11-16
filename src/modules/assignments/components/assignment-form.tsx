@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import {
   createAssignmentAction,
   deleteAssignmentAction,
@@ -9,6 +9,7 @@ import {
 } from "@/modules/assignments/actions";
 import type { Assignment } from "@/modules/assignments/schema";
 import { isoToDhakaParts } from "@/modules/assignments/schema";
+import { Badge, Button, ConfirmButton, Notice, inputClass } from "@/components/ui";
 
 interface AttachmentRef {
   publicId: string;
@@ -42,8 +43,10 @@ export function AssignmentFilePicker({
     if (chosen.length === 0) return;
     setBusy(true);
     const uploaded: AttachmentRef[] = [];
+    let current: File | null = null;
     try {
       for (const f of chosen) {
+        current = f;
         const signRes = await fetch("/api/uploads/sign", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -79,7 +82,12 @@ export function AssignmentFilePicker({
       setFiles(next);
       onChange?.(next);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed.");
+      // Keep files that already uploaded so Cloudinary records aren't orphaned.
+      const next = [...files, ...uploaded].slice(0, 5);
+      setFiles(next);
+      onChange?.(next);
+      const message = err instanceof Error ? err.message : "Upload failed.";
+      setError(current ? `${current.name}: ${message}` : message);
     } finally {
       setBusy(false);
     }
@@ -96,16 +104,21 @@ export function AssignmentFilePicker({
       <p className="text-sm font-medium">
         {label} <span className="text-muted">(PDF/DOCX/PPTX/ZIP · max 30 MB each · up to 5)</span>
       </p>
-      {error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p> : null}
+      {error ? <Notice tone="danger">{error}</Notice> : null}
       {files.map((f, i) => (
         <div key={i} className="flex items-center gap-2 text-sm">
-          <span className="rounded bg-primary-soft px-2 py-0.5 text-xs">attached</span>
+          <Badge tone="info">attached</Badge>
           <span>{f.fileName}</span>
           <span className="num text-xs text-muted">{(f.size / 1024 / 1024).toFixed(1)} MB</span>
           <input type="hidden" name={kind === "submission" ? "file" : "attachment"} value={f.publicId} />
           <input type="hidden" name={kind === "submission" ? "fileName" : "attachmentName"} value={f.fileName} />
           <input type="hidden" name={kind === "submission" ? "fileSize" : "attachmentSize"} value={f.size} />
-          <button type="button" onClick={() => remove(i)} className="text-danger underline">
+          <button
+            type="button"
+            onClick={() => remove(i)}
+            disabled={busy}
+            className="text-danger underline disabled:opacity-60"
+          >
             remove
           </button>
         </div>
@@ -135,29 +148,21 @@ export function AssignmentForm({
 
   if (!showForm) {
     return (
-      <button
-        type="button"
-        onClick={() => setShowForm(true)}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-      >
-        Add assignment
-      </button>
+      <Button onClick={() => setShowForm(true)}>Add assignment</Button>
     );
   }
 
   return (
     <form action={formAction} className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5">
-      {state.error ? (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
-      ) : null}
-      {state.ok ? <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Saved.</p> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Saved.</Notice> : null}
       {editing ? <input type="hidden" name="id" value={assignment!.id} /> : null}
       <input type="hidden" name="courseId" value={courseId} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="text-sm font-medium">
           Title
-          <input name="title" required defaultValue={assignment?.title ?? ""} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+          <input name="title" required defaultValue={assignment?.title ?? ""} className={inputClass} />
         </label>
         <label className="text-sm font-medium">
           Points
@@ -168,27 +173,27 @@ export function AssignmentForm({
             max="1000"
             required
             defaultValue={assignment?.points ?? 10}
-            className="mt-1 w-full rounded-md border border-border px-3 py-2"
+            className={inputClass}
           />
         </label>
         <label className="text-sm font-medium">
           Deadline date <span className="text-muted">(Asia/Dhaka)</span>
-          <input type="date" name="deadlineDate" required defaultValue={dhaka?.date ?? ""} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+          <input type="date" name="deadlineDate" required defaultValue={dhaka?.date ?? ""} className={inputClass} />
         </label>
         <label className="text-sm font-medium">
           Deadline time <span className="text-muted">(Asia/Dhaka)</span>
-          <input type="time" name="deadlineTime" required defaultValue={dhaka?.time ?? "23:59"} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+          <input type="time" name="deadlineTime" required defaultValue={dhaka?.time ?? "23:59"} className={inputClass} />
         </label>
       </div>
 
       <label className="text-sm font-medium">
         Description
-        <textarea name="description" rows={4} defaultValue={assignment?.description ?? ""} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+        <textarea name="description" rows={4} defaultValue={assignment?.description ?? ""} className={inputClass} />
       </label>
 
       <label className="text-sm font-medium">
         Late submissions
-        <select name="latePolicy" defaultValue={assignment?.latePolicy ?? "allow"} className="mt-1 w-full rounded-md border border-border px-3 py-2">
+        <select name="latePolicy" defaultValue={assignment?.latePolicy ?? "allow"} className={inputClass}>
           <option value="allow">Allowed, automatically flagged late</option>
           <option value="block">Blocked after the deadline</option>
         </select>
@@ -203,21 +208,13 @@ export function AssignmentForm({
       />
 
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
-        >
+        <Button type="submit" disabled={pending} aria-busy={pending || undefined}>
           {pending ? "Saving…" : editing ? "Save changes" : "Create assignment"}
-        </button>
+        </Button>
         {editing ? (
-          <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-primary-soft"
-          >
+          <Button variant="secondary" size="md" onClick={() => setShowForm(false)}>
             Cancel
-          </button>
+          </Button>
         ) : null}
       </div>
     </form>
@@ -226,14 +223,22 @@ export function AssignmentForm({
 
 export function DeleteAssignmentButton({ assignmentId, courseId }: { assignmentId: string; courseId: string }) {
   const [state, formAction, pending] = useActionState(deleteAssignmentAction, {} as AssignmentFormState);
+  const formRef = useRef<HTMLFormElement>(null);
   return (
-    <form action={formAction} className="inline">
+    <form ref={formRef} action={formAction} className="inline-flex flex-col gap-2">
       <input type="hidden" name="id" value={assignmentId} />
       <input type="hidden" name="courseId" value={courseId} />
-      <button type="submit" disabled={pending} className="text-xs text-danger underline">
-        {pending ? "…" : "Delete"}
-      </button>
-      {state.error ? <span className="ml-2 text-xs text-danger">{state.error}</span> : null}
+      <ConfirmButton
+        confirm="Delete this assignment? Student submissions and marks attached to it are also removed."
+        onConfirm={() => formRef.current?.requestSubmit()}
+        pending={pending}
+        busyLabel="Deleting…"
+        variant="dangerLink"
+        size="sm"
+      >
+        Delete
+      </ConfirmButton>
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
     </form>
   );
 }

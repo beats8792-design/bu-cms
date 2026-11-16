@@ -7,7 +7,8 @@ import {
   updateCourseAction,
   type FormState,
 } from "@/modules/academic/actions";
-import { FormAlert, Field, inputClass, SubmitButton, useAcademicForm } from "@/modules/academic/form-kit";
+import { FormAlert, SubmitButton, useAcademicForm } from "@/modules/academic/form-kit";
+import { Button, ConfirmButton, Notice, compactInputClass, inputClass, Field } from "@/components/ui";
 import {
   DAY_LABELS,
   findScheduleConflicts,
@@ -38,13 +39,7 @@ export function CourseForm({
 
   if (!showForm) {
     return (
-      <button
-        type="button"
-        onClick={() => setShowForm(true)}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-      >
-        Add course
-      </button>
+      <Button onClick={() => setShowForm(true)}>Add course</Button>
     );
   }
 
@@ -63,9 +58,7 @@ export function CourseForm({
       {editing ? <input type="hidden" name="id" value={course!.id} /> : null}
       <input type="hidden" name="schedule" value={JSON.stringify(slots)} />
       {conflicts.length > 0 ? (
-        <p role="alert" className="rounded-md bg-warn-soft px-3 py-2 text-sm text-warn">
-          {conflicts[0]}
-        </p>
+        <Notice tone="danger">{conflicts[0]}</Notice>
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -140,7 +133,12 @@ export function CourseForm({
       <div>
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium">Weekly class schedule</p>
-          <button type="button" onClick={addSlot} className="text-sm text-primary underline">
+          <button
+            type="button"
+            onClick={addSlot}
+            disabled={pending}
+            className="text-sm text-primary underline disabled:opacity-60"
+          >
             + Add slot
           </button>
         </div>
@@ -150,19 +148,59 @@ export function CourseForm({
         <div className="mt-2 flex flex-col gap-2">
           {slots.map((slot, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
-              <select value={slot.day} onChange={(e) => patchSlot(i, { day: Number(e.target.value) })} className="rounded-md border border-border px-2 py-1 text-sm">
+              <select
+                value={slot.day}
+                onChange={(e) => patchSlot(i, { day: Number(e.target.value) })}
+                aria-label="Slot day"
+                disabled={pending}
+                className={compactInputClass}
+              >
                 {DAY_LABELS.map((label, day) => (
                   <option key={day} value={day}>{label}</option>
                 ))}
               </select>
-              <input type="time" value={slot.start} onChange={(e) => patchSlot(i, { start: e.target.value })} className="rounded-md border border-border px-2 py-1 text-sm" />
+              <input
+                type="time"
+                value={slot.start}
+                onChange={(e) => patchSlot(i, { start: e.target.value })}
+                aria-label="Start time"
+                disabled={pending}
+                className={compactInputClass}
+              />
               <span className="text-muted">–</span>
-              <input type="time" value={slot.end} onChange={(e) => patchSlot(i, { end: e.target.value })} className="rounded-md border border-border px-2 py-1 text-sm" />
-              <input placeholder="Room" value={slot.room} onChange={(e) => patchSlot(i, { room: e.target.value })} className="w-24 rounded-md border border-border px-2 py-1 text-sm" />
-              <input placeholder="Sec" value={slot.section} onChange={(e) => patchSlot(i, { section: e.target.value })} className="w-16 rounded-md border border-border px-2 py-1 text-sm" />
-              <button type="button" onClick={() => setSlots((s) => s.filter((_, j) => j !== i))} aria-label="Remove slot" className="text-danger hover:underline">
+              <input
+                type="time"
+                value={slot.end}
+                onChange={(e) => patchSlot(i, { end: e.target.value })}
+                aria-label="End time"
+                disabled={pending}
+                className={compactInputClass}
+              />
+              <input
+                placeholder="Room"
+                value={slot.room}
+                onChange={(e) => patchSlot(i, { room: e.target.value })}
+                aria-label="Room"
+                disabled={pending}
+                className={`w-24 ${compactInputClass}`}
+              />
+              <input
+                placeholder="Sec"
+                value={slot.section}
+                onChange={(e) => patchSlot(i, { section: e.target.value })}
+                aria-label="Section"
+                disabled={pending}
+                className={`w-16 ${compactInputClass}`}
+              />
+              <ConfirmButton
+                confirm="Remove this class slot from the schedule?"
+                onConfirm={() => setSlots((s) => s.filter((_, j) => j !== i))}
+                disabled={pending}
+                size="sm"
+                variant="danger"
+              >
                 Remove
-              </button>
+              </ConfirmButton>
             </div>
           ))}
         </div>
@@ -171,13 +209,14 @@ export function CourseForm({
       <div className="flex gap-2">
         <SubmitButton pending={pending} label={editing ? "Save changes" : "Create course"} />
         {editing ? (
-          <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-primary-soft"
+          <ConfirmButton
+            confirm="Discard your changes to this course?"
+            onConfirm={() => setShowForm(false)}
+            variant="secondary"
+            size="md"
           >
             Cancel
-          </button>
+          </ConfirmButton>
         ) : null}
       </div>
     </form>

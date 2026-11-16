@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { authClient } from "@/modules/auth/auth-client";
+import { Button, Notice, inputClass } from "@/components/ui";
 
 /** Forgot password: asks for email, triggers BetterAuth reset flow. */
 export function ForgotForm() {
@@ -19,7 +20,11 @@ export function ForgotForm() {
       redirectTo: "/reset-password",
     });
     // Same message whether or not the account exists (no user enumeration).
-    if (err && !err.message?.includes("isn't enabled")) {
+    if (err && err.message?.includes("isn't enabled")) {
+      // Keep the flow, but never fail silently — surface that reset is off.
+      setSent(true);
+      setError("Password reset isn't enabled on this deployment — contact the administrator.");
+    } else if (err) {
       setError("Could not start the reset process right now.");
     } else {
       setSent(true);
@@ -29,16 +34,19 @@ export function ForgotForm() {
 
   if (sent) {
     return (
-      <p className="text-sm text-muted">
-        If an account exists for <strong>{email}</strong>, a reset link is on its way. Check
-        your inbox.
-      </p>
+      <div className="flex flex-col gap-4">
+        {error ? <Notice tone="danger">{error}</Notice> : null}
+        <p className="text-sm text-muted">
+          If an account exists for <strong>{email}</strong>, a reset link is on its way. Check
+          your inbox.
+        </p>
+      </div>
     );
   }
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
-      {error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p> : null}
+      {error ? <Notice tone="danger">{error}</Notice> : null}
       <label className="text-sm font-medium">
         Email
         <input
@@ -46,17 +54,18 @@ export function ForgotForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full rounded-md border border-border px-3 py-2"
+          className={inputClass}
           autoComplete="email"
         />
       </label>
-      <button
+      <Button
         type="submit"
+        variant="primary"
         disabled={loading}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
+        aria-busy={loading || undefined}
       >
         {loading ? "Sending…" : "Send reset link"}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -69,7 +69,7 @@ export default async function AttendanceSessionPage({ params }: Props) {
       {/* Teacher/admin: full editable roster (UCM-F15) */}
       {isManager ? (
         <section className="mt-8">
-          <h2 className="font-display text-lg font-semibold">Mark roster</h2>
+          <h2 className="font-display text-xl font-semibold">Mark roster</h2>
           <div className="mt-2">
             <MarkRoster courseId={courseId} sessionId={sessionId} section={attSession.section} sessionStatus={attSession.status} />
           </div>
@@ -79,7 +79,7 @@ export default async function AttendanceSessionPage({ params }: Props) {
       {/* Student/CR: own record + running percentage (UCM-F16/F17) */}
       {isStudentish && !isManager ? (
         <section className="mt-8">
-          <h2 className="font-display text-lg font-semibold">Your attendance</h2>
+          <h2 className="font-display text-xl font-semibold">Your attendance</h2>
           <MyRecord courseId={courseId} sessionId={sessionId} userId={user.id} />
         </section>
       ) : null}

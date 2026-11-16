@@ -2,19 +2,18 @@
 
 import { useActionState } from "react";
 import { changePasswordAction, type ChangePasswordState } from "@/modules/auth/actions";
+import { Button, Notice, inputClass } from "@/components/ui";
 
 export function PasswordForm() {
   const [state, formAction, pending] = useActionState(changePasswordAction, {} as ChangePasswordState);
 
   return (
     <form action={formAction} className="flex max-w-md flex-col gap-4">
-      {state.error ? (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
-      ) : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
       {state.ok ? (
-        <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">
+        <Notice tone="success">
           Password changed. Other signed-in devices were signed out.
-        </p>
+        </Notice>
       ) : null}
 
       <label className="text-sm font-medium">
@@ -24,7 +23,7 @@ export function PasswordForm() {
           name="currentPassword"
           required
           autoComplete="current-password"
-          className="mt-1 w-full rounded-md border border-border px-3 py-2"
+          className={inputClass}
         />
       </label>
       <label className="text-sm font-medium">
@@ -35,17 +34,19 @@ export function PasswordForm() {
           required
           minLength={8}
           autoComplete="new-password"
-          className="mt-1 w-full rounded-md border border-border px-3 py-2"
+          className={inputClass}
         />
       </label>
 
-      <button
+      <Button
         type="submit"
+        variant="outline"
+        className="self-start"
         disabled={pending}
-        className="self-start rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary-soft disabled:opacity-60"
+        aria-busy={pending || undefined}
       >
         {pending ? "Changing…" : "Change password"}
-      </button>
+      </Button>
     </form>
   );
 }

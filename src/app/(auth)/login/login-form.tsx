@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/modules/auth/auth-client";
+import { Button, inputClass, Notice } from "@/components/ui";
 
 export function LoginForm() {
   const router = useRouter();
@@ -50,11 +51,7 @@ export function LoginForm() {
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
-      {error ? (
-        <p role="alert" className="rounded-md border border-danger-soft bg-danger-soft px-3 py-2 text-sm text-danger">
-          {error}
-        </p>
-      ) : null}
+      {error ? <Notice tone="danger">{error}</Notice> : null}
       {unverified ? (
         <p className="text-sm text-muted">
           {resent
@@ -74,7 +71,7 @@ export function LoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1 w-full rounded-md border border-border px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+          className={inputClass}
           autoComplete="email"
         />
       </label>
@@ -85,18 +82,14 @@ export function LoginForm() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mt-1 w-full rounded-md border border-border px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary"
+          className={inputClass}
           autoComplete="current-password"
         />
       </label>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
-      >
+      <Button type="submit" disabled={loading} aria-busy={loading || undefined}>
         {loading ? "Signing in…" : "Sign in"}
-      </button>
+      </Button>
       <p className="text-sm text-muted">
         No account yet?{" "}
         <Link href="/register" className="text-primary underline">

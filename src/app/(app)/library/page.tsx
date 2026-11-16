@@ -6,6 +6,7 @@ import { listCourses } from "@/modules/academic/courses";
 import { listResources } from "@/modules/collab/library";
 import { kindLabel, RESOURCE_KINDS, type ResourceKind } from "@/modules/collab/schema";
 import { LibraryUploader, ResourceActions } from "@/modules/collab/components/collab-forms";
+import { EmptyState, inputClass, buttonClass } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Library · UCMS" };
 
@@ -56,12 +57,12 @@ export default async function LibraryPage({ searchParams }: Props) {
             name="q"
             defaultValue={query.q}
             placeholder="e.g. CSE past paper 2024"
-            className="mt-1 w-full rounded-md border border-border px-3 py-2"
+            className={inputClass}
           />
         </label>
         <label className="text-sm font-medium">
           Kind
-          <select name="kind" defaultValue={query.kind} className="mt-1 w-full rounded-md border border-border px-3 py-2">
+          <select name="kind" defaultValue={query.kind} className={inputClass}>
             <option value="">All kinds</option>
             {RESOURCE_KINDS.map((k) => (
               <option key={k} value={k}>
@@ -72,7 +73,7 @@ export default async function LibraryPage({ searchParams }: Props) {
         </label>
         <label className="text-sm font-medium">
           Department
-          <select name="departmentId" defaultValue={query.departmentId} className="mt-1 w-full rounded-md border border-border px-3 py-2">
+          <select name="departmentId" defaultValue={query.departmentId} className={inputClass}>
             <option value="">All departments</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
@@ -83,7 +84,7 @@ export default async function LibraryPage({ searchParams }: Props) {
         </label>
         <label className="text-sm font-medium">
           Course
-          <select name="courseId" defaultValue={query.courseId} className="mt-1 w-full rounded-md border border-border px-3 py-2">
+          <select name="courseId" defaultValue={query.courseId} className={inputClass}>
             <option value="">All courses</option>
             {courses.map((c) => (
               <option key={c.id} value={c.id}>
@@ -94,7 +95,7 @@ export default async function LibraryPage({ searchParams }: Props) {
         </label>
         <label className="text-sm font-medium">
           Semester
-          <select name="semesterId" defaultValue={query.semesterId} className="mt-1 w-full rounded-md border border-border px-3 py-2">
+          <select name="semesterId" defaultValue={query.semesterId} className={inputClass}>
             <option value="">All semesters</option>
             {semesters.map((s) => (
               <option key={s.id} value={s.id}>
@@ -104,7 +105,7 @@ export default async function LibraryPage({ searchParams }: Props) {
           </select>
         </label>
         <div className="flex items-end gap-3 sm:col-span-2">
-          <button type="submit" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover">
+          <button type="submit" className={buttonClass("primary", "md")}>
             Apply filters
           </button>
           {activeFilters > 0 ? (
@@ -129,9 +130,13 @@ export default async function LibraryPage({ searchParams }: Props) {
 
       {/* Results */}
       {resources.length === 0 ? (
-        <p className="mt-6 text-sm text-muted">
-          {activeFilters > 0 ? "No resources match those filters." : "The library is empty — be the first to contribute."}
-        </p>
+        <div className="mt-6">
+          <EmptyState title={activeFilters > 0 ? "No resources match those filters" : "The library is empty"}>
+            {activeFilters > 0
+              ? "Try fewer or broader filters — or be the first to contribute a resource for this scope."
+              : "Be the first to contribute a past paper or guide — seniors' uploads help every batch after you."}
+          </EmptyState>
+        </div>
       ) : (
         <ul className="mt-6 flex flex-col gap-2">
           {resources.map((r) => {

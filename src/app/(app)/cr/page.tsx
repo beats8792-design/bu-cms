@@ -11,6 +11,8 @@ import { courseDigest } from "@/modules/attendance/service";
 import { listAnnouncements } from "@/modules/announcements/service";
 import { scopeLabel, type Announcement } from "@/modules/announcements/schema";
 import { dhakaToday } from "@/modules/attendance/schema";
+import type { SessionUser } from "@/modules/auth/session";
+import { Badge } from "@/components/ui";
 
 /**
  * CR dashboard (UCM-R1): own class overview — upcoming deadlines, exam
@@ -30,6 +32,7 @@ export default async function CrDashboardPage() {
   const courses = (await Promise.all(courseIds.map((id) => getCourse(session, id)))) as Awaited<
     ReturnType<typeof getCourse>
   >[];
+  const announcements = await listAnnouncements(session, { limit: 10 });
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -47,7 +50,14 @@ export default async function CrDashboardPage() {
       ) : (
         <div className="mt-6 flex flex-col gap-8">
           {courses.map((c) => (
-            <CourseOverview key={c.id} courseId={c.id} code={c.code} title={c.title} />
+            <CourseOverview
+              key={c.id}
+              user={user}
+              courseId={c.id}
+              code={c.code}
+              title={c.title}
+              announcements={announcements}
+            />
           ))}
         </div>
       )}
@@ -56,27 +66,28 @@ export default async function CrDashboardPage() {
 }
 
 async function CourseOverview({
+  user,
   courseId,
   code,
   title,
+  announcements,
 }: {
+  user: SessionUser;
   courseId: string;
   code: string;
   title: string;
+  announcements: Announcement[];
 }) {
-  const { user } = await appGate();
   const session = { user };
 
-  const [due, events, digest, announcements] = (await Promise.all([
+  const [due, events, digest] = (await Promise.all([
     listDueAssignments(session, [courseId], { limit: 3 }),
     listEvents(session, { scopeType: "course", refId: courseId }),
     courseDigest(session, courseId),
-    listAnnouncements(session, { limit: 10 }),
   ])) as [
     Awaited<ReturnType<typeof listDueAssignments>>,
     Awaited<ReturnType<typeof listEvents>>,
     Awaited<ReturnType<typeof courseDigest>>,
-    Announcement[],
   ];
 
   const exams = events.filter((e) => e.type === "exam" && e.date >= dhakaToday()).slice(0, 3);
@@ -85,7 +96,7 @@ async function CourseOverview({
 
   return (
     <section className="rounded-lg border border-border bg-surface p-4">
-      <h2 className="font-display text-lg font-semibold">
+      <h2 className="font-display text-xl font-semibold">
         <Link href={`/courses/${courseId}`} className="hover:underline">
           {code} — {title}
         </Link>
@@ -132,9 +143,9 @@ async function CourseOverview({
               {warnings.slice(0, 5).map((r) => (
                 <li key={r.userId} className="flex flex-wrap items-baseline gap-2">
                   <span>{r.name}</span>
-                  <span className="num rounded-full bg-danger-soft px-2 py-0.5 text-xs font-medium text-danger">
+                  <Badge tone="warn" className="num">
                     {r.stats.pct === null ? "no data" : `${r.stats.pct}%`}
-                  </span>
+                  </Badge>
                 </li>
               ))}
             </ul>

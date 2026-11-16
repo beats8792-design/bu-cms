@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authClient } from "@/modules/auth/auth-client";
 import { NotificationBell } from "@/modules/notifications/components/notification-bell";
 import { NAV_BY_ROLE } from "@/components/nav";
 import type { Role } from "@/modules/auth/rbac";
+import { Button } from "@/components/ui";
 
 export interface AppShellProps {
   children: React.ReactNode;
@@ -17,12 +18,30 @@ export interface AppShellProps {
 
 /**
  * AppShell for signed-in areas (Brain/DESIGN.md §6). Nav comes from the
- * role map; the admin chip appears only for admins.
+ * role map; the admin chip appears only for admins. Under `md` the nav is
+ * a drawer with a backdrop, Escape-to-close and scroll lock (DESIGN §7:
+ * full keyboard traversal).
  */
 export function AppShell({ children, role, name, email }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Escape closes the drawer; body scroll locks while open. Route changes
+  // close it via the nav links' own onClick handlers.
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawerOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [drawerOpen]);
 
   async function signOut() {
     await authClient.signOut();
@@ -35,14 +54,14 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
   const nav = (
     <nav aria-label="Main" className="flex flex-col gap-1 p-3">
       {items.map((item) => {
-        const active = pathname.startsWith(item.href);
+        const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
           <Link
             key={item.href}
             href={item.href}
             onClick={() => setDrawerOpen(false)}
             aria-current={active ? "page" : undefined}
-            className={`rounded-md px-3 py-2 text-sm font-medium ${
+            className={`rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 ${
               active
                 ? "bg-primary-soft text-primary-hover"
                 : "text-muted hover:bg-primary-soft hover:text-primary-hover"
@@ -63,7 +82,7 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
       >
         Skip to content
       </a>
-      <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-surface px-4">
+      <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border bg-surface px-4">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -88,13 +107,9 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
           <span className="hidden text-sm text-muted md:inline" title={email}>
             {name}
           </span>
-          <button
-            type="button"
-            onClick={signOut}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-primary-soft"
-          >
+          <Button variant="secondary" size="sm" onClick={signOut}>
             Sign out
-          </button>
+          </Button>
         </div>
       </header>
 
@@ -102,11 +117,24 @@ export function AppShell({ children, role, name, email }: AppShellProps) {
         <aside className="hidden w-64 shrink-0 border-r border-border bg-surface md:sticky md:top-14 md:block md:h-[calc(100dvh-3.5rem)] md:self-start md:overflow-y-auto">
           {nav}
         </aside>
-        {drawerOpen && (
-          <div id="app-drawer" className="absolute inset-x-0 top-14 z-10 bg-bg shadow-floating md:hidden">
-            <div className="border-b border-border bg-surface">{nav}</div>
+
+        {drawerOpen ? (
+          <div className="fixed inset-0 top-14 z-20 md:hidden">
+            {/* Backdrop: click dismisses, sits below the sticky header. */}
+            <div
+              className="absolute inset-0 bg-ink/40"
+              aria-hidden="true"
+              onClick={() => setDrawerOpen(false)}
+            />
+            <div
+              id="app-drawer"
+              className="absolute inset-x-0 bottom-0 top-0 overflow-y-auto bg-surface shadow-floating"
+            >
+              <div className="border-b border-border bg-surface">{nav}</div>
+            </div>
           </div>
-        )}
+        ) : null}
+
         <main id="main-content" className="min-w-0 flex-1 p-6">{children}</main>
       </div>
     </div>

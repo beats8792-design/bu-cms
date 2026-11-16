@@ -8,6 +8,7 @@ import {
   type FormState,
 } from "@/modules/academic/actions";
 import { FormAlert, Field, inputClass, SubmitButton, useAcademicForm } from "@/modules/academic/form-kit";
+import { Button } from "@/components/ui";
 import type { Semester } from "@/modules/academic/schema";
 
 export function SemesterForm({ semester }: { semester?: Semester }) {
@@ -19,13 +20,7 @@ export function SemesterForm({ semester }: { semester?: Semester }) {
 
   if (!showForm) {
     return (
-      <button
-        type="button"
-        onClick={() => setShowForm(true)}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
-      >
-        Add semester
-      </button>
+      <Button onClick={() => setShowForm(true)}>Add semester</Button>
     );
   }
 
@@ -62,20 +57,16 @@ export function SemesterForm({ semester }: { semester?: Semester }) {
           type="checkbox"
           name="enrollmentOpen"
           defaultChecked={semester?.enrollmentOpen ?? false}
-          className="size-4 rounded border-border"
+          className="size-4"
         />
         Enrollment window open (students can self-enroll)
       </label>
       <div className="flex gap-2">
         <SubmitButton pending={pending} label={editing ? "Save changes" : "Create semester"} />
         {editing ? (
-          <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-primary-soft"
-          >
+          <Button variant="secondary" size="md" onClick={() => setShowForm(false)}>
             Cancel
-          </button>
+          </Button>
         ) : null}
       </div>
     </form>
@@ -86,21 +77,21 @@ export function WindowToggle({ semester }: { semester: Semester }) {
   const [state, formAction, pending] = useAcademicForm(toggleWindowAction);
   const open = semester.enrollmentOpen;
   return (
-    <form action={formAction} className="inline-flex items-center gap-2">
+    <div className="flex flex-col items-start gap-1">
+      <form action={formAction} className="inline-flex items-center gap-2">
+        <input type="hidden" name="id" value={semester.id} />
+        <input type="hidden" name="open" value={open ? "closed" : "open"} />
+        <Button
+          type="submit"
+          variant="secondary"
+          size="sm"
+          disabled={pending}
+          aria-busy={pending || undefined}
+        >
+          {pending ? "Updating…" : open ? "Window open — close it" : "Window closed — open it"}
+        </Button>
+      </form>
       <FormAlert state={state as FormState} />
-      <input type="hidden" name="id" value={semester.id} />
-      <input type="hidden" name="open" value={open ? "closed" : "open"} />
-      <button
-        type="submit"
-        disabled={pending}
-        className={`rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150 ${
-          open
-            ? "bg-primary-soft text-primary-hover hover:bg-warn-soft hover:text-warn"
-            : "bg-warn-soft text-warn hover:bg-primary-soft hover:text-primary-hover"
-        }`}
-      >
-        {open ? "Window open — close it" : "Window closed — open it"}
-      </button>
-    </form>
+    </div>
   );
 }

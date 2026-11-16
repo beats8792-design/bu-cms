@@ -3,8 +3,8 @@ import Link from "next/link";
 import { appGate } from "@/modules/auth/session";
 import { listCourses, countEnrolled, teacherNamesByIds } from "@/modules/academic/courses";
 import { getOpenSemester, listSemesters } from "@/modules/academic/semesters";
-import { listDepartments } from "@/modules/academic/departments";
 import { myCourseIds } from "@/modules/academic/enrollment";
+import { EmptyState } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Courses" };
 
@@ -24,9 +24,6 @@ export default async function CoursesPage() {
   const mine = new Set(user.role === "student" || user.role === "cr" ? await myCourseIds({ user }) : []);
   const canSelfEnroll = (user.role === "student" || user.role === "cr") && Boolean(openSemester);
 
-  const departmentList =
-    user.role === "admin" || user.role === "teacher" ? await listDepartments({ user }) : [];
-
   return (
     <div className="mx-auto max-w-6xl">
       <h1 className="font-display text-2xl font-semibold">Courses</h1>
@@ -38,25 +35,25 @@ export default async function CoursesPage() {
           : "No semesters exist yet — ask the admin office."}
       </p>
       {user.role === "teacher" ? (
-        <p className="mt-1 text-sm text-muted">
-          You teach the starred (*) courses. Create new ones from your department in the admin area.
-        </p>
-      ) : null}
-
-      {user.role === "teacher" ? (
-        <div className="mt-4 rounded-lg border border-border bg-surface p-4 text-sm">
-          Teacher tools: create a course in{" "}
-          <Link href="/admin/courses" className="text-primary underline">
-            the course manager
-          </Link>
-          {departmentList.length === 0 ? " (no departments yet)" : "."}
-        </div>
+        <>
+          <p className="mt-1 text-sm text-muted">
+            You teach the starred (*) courses below.
+          </p>
+          <div className="mt-4 rounded-lg border border-border bg-surface p-4 text-sm">
+            Teacher tools: open one of your courses below and add its class slots
+            (weekly schedule) from the course page.
+          </div>
+        </>
       ) : null}
 
       {courses.length === 0 ? (
-        <p className="mt-8 text-sm text-muted">
-          {current ? "No courses published for this semester yet." : "Nothing to browse yet."}
-        </p>
+        <div className="mt-8">
+          <EmptyState title="No courses yet">
+            {current
+              ? "No courses published for this semester yet — check back after the admin publishes them."
+              : "Nothing to browse yet — no semesters exist yet."}
+          </EmptyState>
+        </div>
       ) : (
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           {courses.map((c) => {

@@ -55,11 +55,4 @@ export function labelForWindow(window: ReminderWindow): string {
   return window === 48 ? "in 2 days" : window === 24 ? "tomorrow" : "within 2 hours";
 }
 
-/** Icon per notification type (shared by the bell + notifications page). */
-export const NOTIFICATION_ICON: Record<NotificationType, string> = {
-  announcement: "📣",
-  "assignment-deadline": "⏰",
-  "exam-schedule": "📝",
-  "results-published": "📊",
-  system: "🔔",
-};
+/** Reminder labels per window (icon-free; UI shows text, never icons alone). */

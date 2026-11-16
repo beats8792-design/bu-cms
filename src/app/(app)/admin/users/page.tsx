@@ -37,7 +37,7 @@ export default async function AdminUsersPage({
         <h1 className="font-display text-2xl font-semibold">User management</h1>
         <Link
           href="/admin/users/import"
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+          className="inline-flex h-10 items-center rounded-md bg-primary px-4 text-sm font-medium text-white transition-colors duration-150 hover:bg-primary-hover"
         >
           Bulk import CSV
         </Link>
@@ -51,12 +51,12 @@ export default async function AdminUsersPage({
             name="q"
             defaultValue={sp.q ?? ""}
             placeholder="Name or email"
-            className="mt-1 block w-56 rounded-md border border-border px-3 py-2"
+            className="mt-1 block w-56 rounded-lg border border-border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </label>
         <label className="text-sm font-medium">
           Status
-          <select name="status" defaultValue={sp.status ?? ""} className="mt-1 block rounded-md border border-border px-3 py-2">
+          <select name="status" defaultValue={sp.status ?? ""} className="mt-1 block rounded-lg border border-border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
             <option value="">All</option>
             <option value="pending">Pending</option>
             <option value="active">Active</option>
@@ -65,7 +65,7 @@ export default async function AdminUsersPage({
         </label>
         <label className="text-sm font-medium">
           Role
-          <select name="role" defaultValue={sp.role ?? ""} className="mt-1 block rounded-md border border-border px-3 py-2">
+          <select name="role" defaultValue={sp.role ?? ""} className="mt-1 block rounded-lg border border-border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
             <option value="">All</option>
             <option value="admin">Admin</option>
             <option value="teacher">Teacher</option>

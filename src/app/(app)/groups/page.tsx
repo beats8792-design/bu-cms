@@ -5,6 +5,7 @@ import { myCourseIds } from "@/modules/academic/enrollment";
 import { listCourses } from "@/modules/academic/courses";
 import { listGroups } from "@/modules/collab/groups";
 import { GroupCreator } from "@/modules/collab/components/collab-forms";
+import { Badge, EmptyState, Notice } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Study groups · UCMS" };
 
@@ -52,18 +53,22 @@ export default async function GroupsPage() {
             {creatorCourses.length > 0 ? (
               <GroupCreator courses={creatorCourses.map((c) => ({ id: c.id, code: c.code, title: c.title }))} />
             ) : (
-              <p className="rounded-md bg-warn-soft px-3 py-2 text-sm text-warn">
+              <Notice tone="warn">
                 Enroll in a course first — groups are created per course.
-              </p>
+              </Notice>
             )}
           </div>
         </details>
       ) : null}
 
       {visible.length === 0 ? (
-        <p className="mt-6 text-sm text-muted">
-          No study groups yet{isStudentish ? " for your courses" : ""} — create the first one.
-        </p>
+        <div className="mt-6">
+          <EmptyState title="No study groups yet">
+            {isStudentish
+              ? "No study groups for your courses yet — create the first one."
+              : "No study groups yet — create the first one."}
+          </EmptyState>
+        </div>
       ) : null}
 
       {mine.length > 0 ? (
@@ -107,13 +112,11 @@ function GroupCard({
         <Link href={`/groups/${group.id}`} className="font-display text-base font-semibold hover:underline">
           {group.name}
         </Link>
-        <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">
-          section {group.section}
-        </span>
+        <Badge tone="info">section {group.section}</Badge>
         {isOwner ? <span className="text-xs text-primary-hover">owner</span> : null}
       </div>
       <p className="num mt-1 text-xs text-muted">
-        {courseLabel ?? `course ${group.courseId.slice(-6)}`} · {group.members.length} member
+        {courseLabel ?? "course link unavailable"} · {group.members.length} member
         {group.members.length === 1 ? "" : "s"}
       </p>
       {group.description ? <p className="mt-1 text-sm">{group.description}</p> : null}

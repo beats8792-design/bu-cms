@@ -5,6 +5,7 @@ import { appGate } from "@/modules/auth/session";
 import { getCourse } from "@/modules/academic/courses";
 import { getGroup } from "@/modules/collab/groups";
 import { GroupMembershipButtons, Notepad } from "@/modules/collab/components/collab-forms";
+import { Badge } from "@/components/ui";
 
 export const instant = false;
 
@@ -13,8 +14,8 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  return { title: `Group ${id.slice(-6)} · UCMS` };
+  await params;
+  return { title: "Group · UCMS" };
 }
 
 export default async function GroupPage({ params }: Props) {
@@ -41,7 +42,7 @@ export default async function GroupPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-2xl">
       <p className="num text-xs text-muted">
-        {courseLabel ?? `course ${group.courseId.slice(-6)}`} · section {group.section}
+        {courseLabel ?? "course link unavailable"} · section {group.section}
       </p>
       <h1 className="font-display text-2xl font-semibold">{group.name}</h1>
       {group.description ? <p className="mt-1 text-sm">{group.description}</p> : null}
@@ -54,7 +55,7 @@ export default async function GroupPage({ params }: Props) {
 
       {/* Members */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">
+        <h2 className="font-display text-xl font-semibold">
           Members ({group.members.length}/50)
         </h2>
         <ul className="mt-2 flex flex-col gap-1 text-sm">
@@ -62,9 +63,7 @@ export default async function GroupPage({ params }: Props) {
             <li key={m.userId} className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-surface p-2">
               <span className="font-medium">{m.name}</span>
               {m.userId === group.ownerId ? (
-                <span className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">
-                  owner
-                </span>
+                <Badge tone="info">owner</Badge>
               ) : null}
               {m.userId === user.id ? <span className="text-xs text-muted">you</span> : null}
               <span className="num ml-auto text-xs text-muted">
@@ -78,7 +77,7 @@ export default async function GroupPage({ params }: Props) {
       {/* Shared notepad (members + admin only) */}
       {isMember || user.role === "admin" ? (
         <section className="mt-8">
-          <h2 className="font-display text-lg font-semibold">Shared notepad</h2>
+          <h2 className="font-display text-xl font-semibold">Shared notepad</h2>
           <p className="mt-1 text-xs text-muted">
             Everyone in the group edits the same page — last save wins.
           </p>
@@ -92,7 +91,7 @@ export default async function GroupPage({ params }: Props) {
 
       <p className="mt-8">
         <Link href="/groups" className="text-sm underline">
-          ← All groups
+          All groups
         </Link>
       </p>
     </div>

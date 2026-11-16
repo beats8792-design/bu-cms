@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { appGate } from "@/modules/auth/session";
 import { listDepartments } from "@/modules/academic/departments";
+import { Badge, Button, ButtonLink, inputClass } from "@/components/ui";
 import {
   attendanceTrends,
   atRiskStudents,
@@ -41,7 +42,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
       <form method="get" className="mt-4 flex flex-wrap items-end gap-3 rounded-lg border border-border bg-surface p-4">
         <label className="text-sm font-medium">
           Department
-          <select name="departmentId" defaultValue={departmentId} className="mt-1 w-56 rounded-md border border-border px-3 py-2">
+          <select name="departmentId" defaultValue={departmentId} className={`${inputClass} w-56`}>
             <option value="">All departments</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
@@ -50,49 +51,52 @@ export default async function AnalyticsPage({ searchParams }: Props) {
             ))}
           </select>
         </label>
-        <button type="submit" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover">
+        <Button type="submit" variant="primary">
           Apply
-        </button>
-        <a
-          href={`/api/admin/reports/at-risk${departmentId ? `?departmentId=${departmentId}` : ""}`}
-          className="rounded-md border border-border px-3 py-2 text-sm hover:bg-primary-soft"
-        >
-          ⬇ At-risk CSV
-        </a>
+        </Button>
+        <ButtonLink href={`/api/admin/reports/at-risk${departmentId ? `?departmentId=${departmentId}` : ""}`} variant="secondary" size="sm">
+          At-risk CSV
+        </ButtonLink>
       </form>
 
       {/* Data quality (missing marks, stale sessions, failed extractions) */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">
+        <h2 className="font-display text-xl font-semibold">
           Data-quality checks{" "}
-          {quality.length > 0 ? <span className="text-warn">({quality.length} issues)</span> : <span className="text-primary-hover">✓ clean</span>}
+          {quality.length > 0 ? <span className="text-warn">({quality.length} issues)</span> : <span className="text-primary-hover">clean</span>}
         </h2>
         {quality.length === 0 ? (
           <p className="mt-2 text-sm text-muted">No issues found for this scope.</p>
         ) : (
-          <ul className="mt-2 flex flex-col gap-1 text-sm">
-            {quality.slice(0, 25).map((q, i) => (
-              <li key={i} className="flex flex-wrap items-center gap-2 rounded-md border border-warn/40 bg-warn-soft p-2">
-                <span className="rounded-full bg-surface px-2 py-0.5 text-xs font-medium text-warn">{q.kind}</span>
-                <span className="font-medium">{q.courseCode}</span>
-                <span>{q.message}</span>
-                <Link href={`/courses/${q.courseId}`} className="ml-auto text-xs underline">
-                  open
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="mt-2 flex flex-col gap-1 text-sm">
+              {quality.slice(0, 25).map((q, i) => (
+                <li key={i} className="flex flex-wrap items-center gap-2 rounded-md border border-warn/40 bg-warn-soft p-2">
+                  <Badge tone="warn">{q.kind}</Badge>
+                  <span className="font-medium">{q.courseCode}</span>
+                  <span>{q.message}</span>
+                  <Link href={`/courses/${q.courseId}`} className="ml-auto text-xs underline">
+                    open
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {quality.length > 25 ? (
+              <p className="mt-2 text-xs text-muted">Showing first 25 of {quality.length}.</p>
+            ) : null}
+          </>
         )}
       </section>
 
       {/* At-risk students (UCM-D5) */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">At-risk students ({risk.length})</h2>
+        <h2 className="font-display text-xl font-semibold">At-risk students ({risk.length})</h2>
         <p className="mt-1 text-xs text-muted">Low attendance (below the course threshold) or failing total (&lt; 40) when marks exist.</p>
         {risk.length === 0 ? (
           <p className="mt-2 text-sm text-muted">Nobody flagged in this scope.</p>
         ) : (
-          <table className="mt-2 w-full border-collapse text-sm">
+          <>
+            <table className="mt-2 w-full border-collapse text-sm">
             <caption className="sr-only">Students with low attendance or failing marks</caption>
             <thead>
               <tr className="border-b border-border text-left text-muted">
@@ -118,12 +122,10 @@ export default async function AnalyticsPage({ searchParams }: Props) {
                   <td className="py-2">
                     <span className="flex flex-wrap gap-1">
                       {r.flags.lowAttendance ? (
-                        <span className="rounded-full bg-danger-soft px-2 py-0.5 text-xs font-medium text-danger">
-                          &lt; {r.threshold}%
-                        </span>
+                        <Badge tone="warn">&lt; {r.threshold}% attendance</Badge>
                       ) : null}
                       {r.flags.failing ? (
-                        <span className="rounded-full bg-danger-soft px-2 py-0.5 text-xs font-medium text-danger">failing</span>
+                        <Badge tone="danger">failing</Badge>
                       ) : null}
                     </span>
                   </td>
@@ -131,12 +133,16 @@ export default async function AnalyticsPage({ searchParams }: Props) {
               ))}
             </tbody>
           </table>
+          {risk.length > 40 ? (
+            <p className="mt-2 text-xs text-muted">Showing first 40 of {risk.length}.</p>
+          ) : null}
+          </>
         )}
       </section>
 
       {/* Attendance trends (UCM-D4) */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Attendance trends (lowest first)</h2>
+        <h2 className="font-display text-xl font-semibold">Attendance trends (lowest first)</h2>
         {trends.length === 0 ? (
           <p className="mt-2 text-sm text-muted">No attendance recorded in this scope yet.</p>
         ) : (
@@ -147,13 +153,9 @@ export default async function AnalyticsPage({ searchParams }: Props) {
                   {t.code}
                 </Link>
                 <span className="text-muted">{t.title}</span>
-                <span
-                  className={`num ml-auto rounded-full px-2 py-0.5 text-xs font-medium ${
-                    t.pct !== null && t.pct < 75 ? "bg-danger-soft text-danger" : "bg-primary-soft text-primary-hover"
-                  }`}
-                >
+                <Badge tone={t.pct !== null && t.pct < 75 ? "warn" : "info"} className="num ml-auto">
                   {t.pct === null ? "no data" : `${t.pct}%`} ({t.attended}/{t.possible})
-                </span>
+                </Badge>
               </li>
             ))}
           </ul>
@@ -162,7 +164,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
 
       {/* Result distributions + GPA (UCM-D5) */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Result distributions</h2>
+        <h2 className="font-display text-xl font-semibold">Result distributions</h2>
         {grades.length === 0 ? (
           <p className="mt-2 text-sm text-muted">No assessment schemas in this scope yet.</p>
         ) : (
@@ -181,9 +183,9 @@ export default async function AnalyticsPage({ searchParams }: Props) {
                 </p>
                 <p className="mt-1 flex flex-wrap gap-1">
                   {g.distribution.map((d) => (
-                    <span key={d.letter} className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary-hover">
+                    <Badge key={d.letter} tone="info">
                       {d.letter} ×{d.count}
-                    </span>
+                    </Badge>
                   ))}
                 </p>
               </li>
@@ -194,7 +196,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
 
       {/* Assignment stats (UCM-D6) */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Assignment submission stats</h2>
+        <h2 className="font-display text-xl font-semibold">Assignment submission stats</h2>
         {assignments.length === 0 ? (
           <p className="mt-2 text-sm text-muted">No assignments in this scope yet.</p>
         ) : (

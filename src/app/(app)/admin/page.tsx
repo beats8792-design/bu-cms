@@ -35,20 +35,20 @@ export default async function AdminPage() {
       </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
-        <Link href="/admin/users" className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover">
+        <Link href="/admin/users" className="inline-flex h-10 items-center rounded-md bg-primary px-4 text-sm font-medium text-white transition-colors duration-150 hover:bg-primary-hover">
           Manage users
         </Link>
-        <Link href="/admin/analytics" className="rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary-soft">
-          Analytics & data quality
+        <Link href="/admin/analytics" className="inline-flex h-10 items-center rounded-md border border-primary bg-surface px-4 text-sm font-medium text-primary transition-colors duration-150 hover:bg-primary-soft">
+          Analytics &amp; data quality
         </Link>
-        <Link href="/admin/logs" className="rounded-md border border-border px-4 py-2 text-sm hover:bg-primary-soft">
+        <Link href="/admin/logs" className="inline-flex h-10 items-center rounded-md border border-border bg-surface px-4 text-sm transition-colors duration-150 hover:bg-primary-soft">
           Activity log
         </Link>
       </div>
 
       {/* Department health (UCM-D1) */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Department health</h2>
+        <h2 className="font-display text-xl font-semibold">Department health</h2>
         {health.length === 0 ? (
           <p className="mt-2 text-sm text-muted">No departments yet.</p>
         ) : (
@@ -86,7 +86,7 @@ export default async function AdminPage() {
 
       {/* Recent activity (UCM-D7) */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Recent activity</h2>
+        <h2 className="font-display text-xl font-semibold">Recent activity</h2>
         {activity.length === 0 ? (
           <p className="mt-2 text-sm text-muted">Nothing logged yet — actions appear as admins and teachers work.</p>
         ) : (

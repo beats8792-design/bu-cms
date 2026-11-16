@@ -3,7 +3,7 @@ import {
   dueWindows,
   reminderKey,
   labelForWindow,
-  NOTIFICATION_ICON,
+  NOTIFICATION_TYPES,
 } from "@/modules/notifications/schema";
 import {
   canPostAnnouncement,
@@ -33,7 +33,7 @@ describe("dueWindows / dedup keys", () => {
     expect(labelForWindow(48)).toBe("in 2 days");
     expect(labelForWindow(24)).toBe("tomorrow");
     expect(labelForWindow(2)).toBe("within 2 hours");
-    expect(Object.keys(NOTIFICATION_ICON)).toHaveLength(5);
+    expect(NOTIFICATION_TYPES).toHaveLength(5);
   });
 });
 

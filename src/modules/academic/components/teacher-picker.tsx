@@ -5,6 +5,7 @@ import {
   setCourseTeachersAction,
   type FormState,
 } from "@/modules/academic/actions";
+import { Button, Notice } from "@/components/ui";
 
 /** Admin-only: pick teachers for a course from a searchable checkbox list. */
 export function TeacherPicker({
@@ -21,12 +22,8 @@ export function TeacherPicker({
 
   return (
     <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-      {state.error ? (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
-      ) : null}
-      {state.ok ? (
-        <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Teachers updated.</p>
-      ) : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Teachers updated.</Notice> : null}
       <input type="hidden" name="id" value={courseId} />
       <p className="text-sm font-medium">Assigned teachers</p>
       {teachers.length === 0 ? (
@@ -49,13 +46,14 @@ export function TeacherPicker({
           ))}
         </div>
       )}
-      <button
+      <Button
         type="submit"
         disabled={pending}
-        className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
+        aria-busy={pending || undefined}
+        className="self-start"
       >
         {pending ? "Saving…" : "Save teachers"}
-      </button>
+      </Button>
     </form>
   );
 }

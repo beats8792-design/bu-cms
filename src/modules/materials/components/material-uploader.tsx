@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { toggleMaterialAction, type MaterialFormState } from "@/modules/materials/actions";
 import { MAX_MATERIAL_BYTES } from "@/modules/materials/schema";
+import { Button, Notice, inputClass } from "@/components/ui";
 
 interface SignedUpload {
   cloudName: string;
@@ -19,6 +20,7 @@ export function MaterialUploader({ courseId }: { courseId: string }) {
   const [title, setTitle] = useState("");
   const [topic, setTopic] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [uploadLabel, setUploadLabel] = useState("Uploading…");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
 
@@ -36,6 +38,7 @@ export function MaterialUploader({ courseId }: { courseId: string }) {
     }
 
     setUploading(true);
+    setUploadLabel("Uploading…");
     try {
       // 1) ask the server for a signature (also re-checks course-manager RBAC)
       const signRes = await fetch("/api/uploads/sign", {
@@ -47,6 +50,7 @@ export function MaterialUploader({ courseId }: { courseId: string }) {
       if (!signRes.ok) throw new Error(signed.error ?? "Could not start the upload.");
 
       // 2) upload straight to Cloudinary (raw endpoint)
+      setUploadLabel(`Uploading… ${file.name}`);
       const form = new FormData();
       form.append("file", file);
       form.append("api_key", signed.apiKey);
@@ -63,6 +67,7 @@ export function MaterialUploader({ courseId }: { courseId: string }) {
       }
 
       // 3) record metadata + trigger text extraction
+      setUploadLabel("Saving record…");
       const recRes = await fetch("/api/materials", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,12 +96,8 @@ export function MaterialUploader({ courseId }: { courseId: string }) {
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-      {error ? (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>
-      ) : null}
-      {done ? (
-        <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">{done}</p>
-      ) : null}
+      {error ? <Notice tone="danger">{error}</Notice> : null}
+      {done ? <Notice tone="success">{done}</Notice> : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium">
           File <span className="text-muted">(PDF, DOCX, PPTX, ZIP · max 30 MB)</span>
@@ -104,6 +105,7 @@ export function MaterialUploader({ courseId }: { courseId: string }) {
             type="file"
             accept=".pdf,.docx,.pptx,.zip"
             required
+            disabled={uploading}
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             className="mt-1 w-full text-sm"
           />
@@ -114,7 +116,7 @@ export function MaterialUploader({ courseId }: { courseId: string }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Week 1 — Intro slides"
-            className="mt-1 w-full rounded-md border border-border px-3 py-2 text-base"
+            className={inputClass}
           />
         </label>
         <label className="text-sm font-medium">
@@ -123,17 +125,18 @@ export function MaterialUploader({ courseId }: { courseId: string }) {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="Week 1"
-            className="mt-1 w-full rounded-md border border-border px-3 py-2 text-base"
+            className={inputClass}
           />
         </label>
       </div>
-      <button
+      <Button
         type="submit"
         disabled={uploading}
-        className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
+        aria-busy={uploading || undefined}
+        className="self-start"
       >
-        {uploading ? "Uploading…" : "Upload material"}
-      </button>
+        {uploading ? uploadLabel : "Upload material"}
+      </Button>
     </form>
   );
 }
@@ -143,12 +146,18 @@ export function MaterialVisibilityToggle({ materialId, hidden }: { materialId: s
   const [state, formAction, pending] = useActionState(toggleMaterialAction, {} as MaterialFormState);
   return (
     <form action={formAction} className="inline-flex items-center gap-2">
-      {state.error ? <span className="text-xs text-danger">{state.error}</span> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
       <input type="hidden" name="id" value={materialId} />
       <input type="hidden" name="hidden" value={hidden ? "false" : "true"} />
-      <button type="submit" disabled={pending} className="text-xs text-muted underline hover:text-danger">
-        {pending ? "…" : hidden ? "Restore" : "Hide"}
-      </button>
+      <Button
+        type="submit"
+        size="sm"
+        variant="secondary"
+        disabled={pending}
+        aria-busy={pending || undefined}
+      >
+        {pending ? (hidden ? "Restoring…" : "Hiding…") : hidden ? "Restore" : "Hide"}
+      </Button>
     </form>
   );
 }

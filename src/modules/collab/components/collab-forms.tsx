@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import {
   approveResourceAction,
   createGroupAction,
@@ -17,6 +17,7 @@ import {
   type CollabFormState,
 } from "@/modules/collab/actions";
 import type { CourseNote, LibraryResource, StudyGroup } from "@/modules/collab/schema";
+import { Badge, Button, ConfirmButton, Notice, inputClass, textareaClass } from "@/components/ui";
 
 /* --------------------------------------------------------- shared uploader */
 
@@ -83,15 +84,18 @@ export function CollabFilePicker({
   return (
     <div className="flex flex-col gap-1">
       <p className="text-sm font-medium">{label}</p>
-      {error ? <p role="alert" className="rounded-md bg-danger-soft px-2 py-1 text-xs text-danger">{error}</p> : null}
+      {error ? <Notice tone="danger">{error}</Notice> : null}
       {picked ? (
-        <p className="text-sm">
-          <span className="rounded bg-primary-soft px-2 py-0.5 text-xs">attached</span>{" "}
-          {picked.fileName}{" "}
+        <p className="flex flex-wrap items-center gap-2 text-sm">
+          <Badge tone="info">attached</Badge>
+          {picked.fileName}
           <span className="num text-xs text-muted">{(picked.size / 1024 / 1024).toFixed(1)} MB</span>
           <input type="hidden" name={`${idPrefix}PublicId`} value={picked.publicId} />
           <input type="hidden" name={`${idPrefix}FileName`} value={picked.fileName} />
           <input type="hidden" name={`${idPrefix}Size`} value={picked.size} />
+          <Button size="sm" variant="secondary" onClick={() => setPicked(null)}>
+            Remove
+          </Button>
         </p>
       ) : (
         <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={pick} disabled={busy} className="text-sm" />
@@ -108,21 +112,17 @@ export function NoteUploader({ courseId }: { courseId: string }) {
   const [state, formAction, pending] = useActionState(createNoteAction, {} as CollabFormState);
   return (
     <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-      {state.error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p> : null}
-      {state.ok ? <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Note published.</p> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Note published.</Notice> : null}
       <input type="hidden" name="courseId" value={courseId} />
       <label className="text-sm font-medium">
         Title
-        <input name="title" required minLength={3} maxLength={160} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+        <input name="title" required minLength={3} maxLength={160} className={inputClass} />
       </label>
       <CollabFilePicker kind="note" courseId={courseId} idPrefix="file" />
-      <button
-        type="submit"
-        disabled={pending}
-        className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
-      >
+      <Button type="submit" disabled={pending} aria-busy={pending || undefined} className="self-start">
         {pending ? "Publishing…" : "Publish note"}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -130,26 +130,34 @@ export function NoteUploader({ courseId }: { courseId: string }) {
 export function NoteActions({ note, canPin, canDelete }: { note: CourseNote; canPin: boolean; canDelete: boolean }) {
   const [pinState, pinAction, pinPending] = useActionState(toggleNotePinAction, {} as CollabFormState);
   const [delState, delAction, delPending] = useActionState(deleteNoteAction, {} as CollabFormState);
+  const delFormRef = useRef<HTMLFormElement>(null);
   return (
     <p className="flex gap-3">
       {canPin ? (
         <form action={pinAction} className="inline">
           <input type="hidden" name="id" value={note.id} />
           <input type="hidden" name="pinned" value={note.pinned ? "false" : "true"} />
-          <button type="submit" disabled={pinPending} className="text-xs underline">
-            {pinPending ? "…" : note.pinned ? "Unpin" : "Pin"}
+          <button type="submit" disabled={pinPending} className="text-xs underline disabled:opacity-60">
+            {pinPending ? "Pinning…" : note.pinned ? "Unpin" : "Pin"}
           </button>
         </form>
       ) : null}
       {canDelete ? (
-        <form action={delAction} className="inline">
+        <form ref={delFormRef} action={delAction} className="inline">
           <input type="hidden" name="id" value={note.id} />
-          <button type="submit" disabled={delPending} className="text-xs text-danger underline">
-            {delPending ? "…" : "Delete"}
-          </button>
+          <ConfirmButton
+            confirm="Delete this note?"
+            onConfirm={() => delFormRef.current?.requestSubmit()}
+            pending={delPending}
+            busyLabel="Deleting…"
+            variant="dangerLink"
+            size="sm"
+          >
+            Delete
+          </ConfirmButton>
         </form>
       ) : null}
-      {(pinState.error ?? delState.error) ? <span className="text-xs text-danger">{pinState.error ?? delState.error}</span> : null}
+      {(pinState.error ?? delState.error) ? <Notice tone="danger">{pinState.error ?? delState.error}</Notice> : null}
     </p>
   );
 }
@@ -169,17 +177,17 @@ export function LibraryUploader({
   const [state, formAction, pending] = useActionState(createResourceAction, {} as CollabFormState);
   return (
     <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-      {state.error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p> : null}
-      {state.ok ? <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Published to the library.</p> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Published to the library.</Notice> : null}
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm font-medium">
           Title
-          <input name="title" required minLength={3} maxLength={160} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+          <input name="title" required minLength={3} maxLength={160} className={inputClass} />
         </label>
         <label className="text-sm font-medium">
           Kind
-          <select name="kind" className="mt-1 w-full rounded-md border border-border px-3 py-2">
+          <select name="kind" className={inputClass}>
             <option value="past-paper">Past paper</option>
             <option value="guide">Senior&apos;s guide</option>
             <option value="other">Other</option>
@@ -187,7 +195,7 @@ export function LibraryUploader({
         </label>
         <label className="text-sm font-medium">
           Department <span className="text-muted">(tag, optional)</span>
-          <select name="departmentId" className="mt-1 w-full rounded-md border border-border px-3 py-2">
+          <select name="departmentId" className={inputClass}>
             <option value="">—</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
@@ -198,7 +206,7 @@ export function LibraryUploader({
         </label>
         <label className="text-sm font-medium">
           Course <span className="text-muted">(tag, optional)</span>
-          <select name="courseId" className="mt-1 w-full rounded-md border border-border px-3 py-2">
+          <select name="courseId" className={inputClass}>
             <option value="">—</option>
             {courses.map((c) => (
               <option key={c.id} value={c.id}>
@@ -209,7 +217,7 @@ export function LibraryUploader({
         </label>
         <label className="text-sm font-medium">
           Semester <span className="text-muted">(tag, optional)</span>
-          <select name="semesterId" className="mt-1 w-full rounded-md border border-border px-3 py-2">
+          <select name="semesterId" className={inputClass}>
             <option value="">—</option>
             {semesters.map((s) => (
               <option key={s.id} value={s.id}>
@@ -222,17 +230,13 @@ export function LibraryUploader({
 
       <label className="text-sm font-medium">
         Description <span className="text-muted">(optional)</span>
-        <textarea name="description" rows={2} maxLength={1000} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+        <textarea name="description" rows={2} maxLength={1000} className={textareaClass} />
       </label>
 
       <CollabFilePicker kind="library" idPrefix="file" />
-      <button
-        type="submit"
-        disabled={pending}
-        className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
-      >
+      <Button type="submit" disabled={pending} aria-busy={pending || undefined} className="self-start">
         {pending ? "Publishing…" : "Publish resource"}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -248,27 +252,35 @@ export function ResourceActions({
 }) {
   const [delState, delAction, delPending] = useActionState(deleteResourceAction, {} as CollabFormState);
   const [apprState, apprAction, apprPending] = useActionState(approveResourceAction, {} as CollabFormState);
+  const delFormRef = useRef<HTMLFormElement>(null);
   const own = resource.uploaderId === userId;
   return (
     <p className="flex gap-3">
       {own || isAdmin ? (
-        <form action={delAction} className="inline">
+        <form ref={delFormRef} action={delAction} className="inline">
           <input type="hidden" name="id" value={resource.id} />
-          <button type="submit" disabled={delPending} className="text-xs text-danger underline">
-            {delPending ? "…" : "Delete"}
-          </button>
+          <ConfirmButton
+            confirm="Delete this resource? Download counts are lost."
+            onConfirm={() => delFormRef.current?.requestSubmit()}
+            pending={delPending}
+            busyLabel="Deleting…"
+            variant="dangerLink"
+            size="sm"
+          >
+            Delete
+          </ConfirmButton>
         </form>
       ) : null}
       {isAdmin ? (
         <form action={apprAction} className="inline">
           <input type="hidden" name="id" value={resource.id} />
           <input type="hidden" name="approved" value={resource.approved ? "false" : "true"} />
-          <button type="submit" disabled={apprPending} className="text-xs underline">
-            {apprPending ? "…" : resource.approved ? "Hide" : "Approve"}
+          <button type="submit" disabled={apprPending} className="text-xs underline disabled:opacity-60">
+            {apprPending ? (resource.approved ? "Hiding…" : "Approving…") : resource.approved ? "Hide" : "Approve"}
           </button>
         </form>
       ) : null}
-      {(delState.error ?? apprState.error) ? <span className="text-xs text-danger">{delState.error ?? apprState.error}</span> : null}
+      {(delState.error ?? apprState.error) ? <Notice tone="danger">{delState.error ?? apprState.error}</Notice> : null}
     </p>
   );
 }
@@ -279,11 +291,11 @@ export function GroupCreator({ courses }: { courses: Array<{ id: string; code: s
   const [state, formAction, pending] = useActionState(createGroupAction, {} as CollabFormState);
   return (
     <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-      {state.error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p> : null}
-      {state.ok ? <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Group created.</p> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Group created.</Notice> : null}
       <label className="text-sm font-medium">
         Course
-        <select name="courseId" required className="mt-1 w-full rounded-md border border-border px-3 py-2">
+        <select name="courseId" required className={inputClass}>
           {courses.map((c) => (
             <option key={c.id} value={c.id}>
               {c.code} — {c.title}
@@ -293,19 +305,15 @@ export function GroupCreator({ courses }: { courses: Array<{ id: string; code: s
       </label>
       <label className="text-sm font-medium">
         Group name
-        <input name="name" required minLength={3} maxLength={80} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+        <input name="name" required minLength={3} maxLength={80} className={inputClass} />
       </label>
       <label className="text-sm font-medium">
         Description <span className="text-muted">(optional)</span>
-        <textarea name="description" rows={2} maxLength={500} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+        <textarea name="description" rows={2} maxLength={500} className={textareaClass} />
       </label>
-      <button
-        type="submit"
-        disabled={pending}
-        className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
-      >
+      <Button type="submit" disabled={pending} aria-busy={pending || undefined} className="self-start">
         {pending ? "Creating…" : "Create group"}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -325,6 +333,7 @@ export function GroupMembershipButtons({
   const [leaveState, leaveAction, leavePending] = useActionState(leaveGroupAction, {} as CollabFormState);
   const [delState, delAction, delPending] = useActionState(deleteGroupAction, {} as CollabFormState);
   const [remState, remAction, remPending] = useActionState(removeMemberAction, {} as CollabFormState);
+  const delFormRef = useRef<HTMLFormElement>(null);
   const error = joinState.error ?? leaveState.error ?? delState.error ?? remState.error;
 
   return (
@@ -332,46 +341,73 @@ export function GroupMembershipButtons({
       {!isMember ? (
         <form action={joinAction} className="inline">
           <input type="hidden" name="id" value={group.id} />
-          <button
-            type="submit"
-            disabled={joinPending}
-            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
-          >
-            {joinPending ? "…" : "Join group"}
-          </button>
+          <Button type="submit" size="sm" disabled={joinPending} aria-busy={joinPending || undefined}>
+            {joinPending ? "Joining…" : "Join group"}
+          </Button>
         </form>
       ) : null}
       {isMember && !isOwner ? (
         <form action={leaveAction} className="inline">
           <input type="hidden" name="id" value={group.id} />
-          <button type="submit" disabled={leavePending} className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-primary-soft">
-            {leavePending ? "…" : "Leave"}
-          </button>
+          <Button type="submit" variant="secondary" size="sm" disabled={leavePending} aria-busy={leavePending || undefined}>
+            {leavePending ? "Leaving…" : "Leave"}
+          </Button>
         </form>
       ) : null}
       {isOwner ? (
-        <form action={delAction} className="inline">
+        <form ref={delFormRef} action={delAction} className="inline">
           <input type="hidden" name="id" value={group.id} />
-          <button type="submit" disabled={delPending} className="text-sm text-danger underline">
-            {delPending ? "…" : "Delete group"}
-          </button>
+          <ConfirmButton
+            confirm="Delete this group and its membership list? This cannot be undone."
+            onConfirm={() => delFormRef.current?.requestSubmit()}
+            pending={delPending}
+            busyLabel="Deleting…"
+            variant="dangerLink"
+            size="sm"
+          >
+            Delete group
+          </ConfirmButton>
         </form>
       ) : null}
-      {error ? <span className="text-xs text-danger">{error}</span> : null}
+      {error ? <Notice tone="danger">{error}</Notice> : null}
       {isOwner
         ? group.members
             .filter((m) => m.userId !== userId)
-            .map((m) => (
-              <form key={m.userId} action={remAction} className="inline">
-                <input type="hidden" name="id" value={group.id} />
-                <input type="hidden" name="memberId" value={m.userId} />
-                <button type="submit" disabled={remPending} className="text-xs text-danger underline">
-                  remove {m.name.split(" ")[0]}
-                </button>
-              </form>
-            ))
+            .map((m) => <MemberRemoveButton key={m.userId} groupId={group.id} memberId={m.userId} memberName={m.name} action={remAction} pending={remPending} />)
         : null}
     </div>
+  );
+}
+
+function MemberRemoveButton({
+  groupId,
+  memberId,
+  memberName,
+  action,
+  pending,
+}: {
+  groupId: string;
+  memberId: string;
+  memberName: string;
+  action: (formData: FormData) => void;
+  pending: boolean;
+}) {
+  const formRef = useRef<HTMLFormElement>(null);
+  return (
+    <form ref={formRef} action={action} className="inline">
+      <input type="hidden" name="id" value={groupId} />
+      <input type="hidden" name="memberId" value={memberId} />
+      <ConfirmButton
+        confirm={`Remove ${memberName.split(" ")[0]} from this group?`}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        pending={pending}
+        busyLabel="Removing…"
+        variant="dangerLink"
+        size="sm"
+      >
+        remove {memberName.split(" ")[0]}
+      </ConfirmButton>
+    </form>
   );
 }
 
@@ -379,8 +415,8 @@ export function Notepad({ group }: { group: StudyGroup }) {
   const [state, formAction, pending] = useActionState(saveGroupNotesAction, {} as CollabFormState);
   return (
     <form action={formAction} className="flex flex-col gap-2">
-      {state.error ? <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p> : null}
-      {state.ok ? <p className="text-xs text-primary-hover">Saved.</p> : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Saved.</Notice> : null}
       <input type="hidden" name="id" value={group.id} />
       <textarea
         name="notes"
@@ -388,16 +424,12 @@ export function Notepad({ group }: { group: StudyGroup }) {
         defaultValue={group.notes}
         maxLength={20000}
         placeholder="Shared notepad — everyone in the group can edit. Study plans, links, division of topics…"
-        className="w-full rounded-md border border-border px-3 py-2 text-sm"
+        className={textareaClass}
       />
       <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
-        >
+        <Button type="submit" disabled={pending} aria-busy={pending || undefined} className="self-start">
           {pending ? "Saving…" : "Save notepad"}
-        </button>
+        </Button>
         {group.notesUpdatedAt ? (
           <p className="num text-xs text-muted">
             Last edit {group.notesUpdatedAt.slice(0, 16).replace("T", " ")}

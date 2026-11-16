@@ -127,7 +127,7 @@ export default async function CoursePage({ params }: Props) {
 
       {/* Schedule */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Class schedule</h2>
+        <h2 className="font-display text-xl font-semibold">Class schedule</h2>
         {course.schedule.length === 0 ? (
           <p className="mt-2 text-sm text-muted">No class slots set yet.</p>
         ) : (
@@ -146,7 +146,7 @@ export default async function CoursePage({ params }: Props) {
         <p className="mt-6">
           <Link
             href={`/courses/${course.id}/marks`}
-            className="rounded-md border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary-soft"
+            className="inline-flex h-10 items-center rounded-md border border-primary bg-surface px-4 text-sm font-medium text-primary transition-colors duration-150 hover:bg-primary-soft"
           >
             {canManage ? "Marks & results — enter marks, publish" : "View my marks & results"}
           </Link>
@@ -155,22 +155,22 @@ export default async function CoursePage({ params }: Props) {
 
       {/* AI tools (UCM-A1–A3) */}
       {canManage || isStudentishEnrolled ? (
-        <p className="mt-3 flex flex-wrap gap-3 text-sm">
-          <Link href={`/courses/${course.id}/assistant`} className="rounded-md border border-border px-3 py-2 hover:bg-primary-soft">
-            🤖 AI Course Assistant
+        <div className="mt-3 flex flex-wrap gap-3">
+          <Link href={`/courses/${course.id}/assistant`} className="inline-flex h-8 items-center rounded-md border border-border bg-surface px-3 text-sm font-medium transition-colors duration-150 hover:bg-primary-soft">
+            AI Course Assistant
           </Link>
-          <Link href={`/courses/${course.id}/summaries`} className="rounded-md border border-border px-3 py-2 hover:bg-primary-soft">
+          <Link href={`/courses/${course.id}/summaries`} className="inline-flex h-8 items-center rounded-md border border-border bg-surface px-3 text-sm font-medium transition-colors duration-150 hover:bg-primary-soft">
             AI summaries
           </Link>
-          <Link href={`/courses/${course.id}/quiz`} className="rounded-md border border-border px-3 py-2 hover:bg-primary-soft">
+          <Link href={`/courses/${course.id}/quiz`} className="inline-flex h-8 items-center rounded-md border border-border bg-surface px-3 text-sm font-medium transition-colors duration-150 hover:bg-primary-soft">
             Quiz drafts
           </Link>
-        </p>
+        </div>
       ) : null}
 
       {/* Materials (UCM-F8) */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Materials</h2>
+        <h2 className="font-display text-xl font-semibold">Materials</h2>
         {materials.length === 0 ? (
           <p className="mt-2 text-sm text-muted">
             {canManage ? "No materials yet — upload the first file below." : "No materials yet."}
@@ -220,7 +220,7 @@ export default async function CoursePage({ params }: Props) {
       {/* Notes shared by course members (UCM-C1) */}
       {canManage || isStudentishEnrolled ? (
         <section className="mt-8">
-          <h2 className="font-display text-lg font-semibold">Notes</h2>
+          <h2 className="font-display text-xl font-semibold">Notes</h2>
           {notes.length === 0 ? (
             <p className="mt-2 text-sm text-muted">No notes yet.</p>
           ) : (
@@ -264,7 +264,7 @@ export default async function CoursePage({ params }: Props) {
       {/* Assignments (UCM-F10…F14) */}
       {canManage || myRow?.status === "enrolled" || user.role === "alumni" ? (
         <section className="mt-8">
-          <h2 className="font-display text-lg font-semibold">Assignments</h2>
+          <h2 className="font-display text-xl font-semibold">Assignments</h2>
           {assignments.length === 0 ? (
             <p className="mt-2 text-sm text-muted">
               {canManage ? "No assignments yet — add the first one below." : "No assignments yet."}
@@ -306,7 +306,7 @@ export default async function CoursePage({ params }: Props) {
 
       {/* Attendance (UCM-F15…F17) */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Attendance</h2>
+        <h2 className="font-display text-xl font-semibold">Attendance</h2>
         {canManage ? (
           <AttendanceManager courseId={course.id} sections={rosterSections} />
         ) : isStudentishEnrolled ? (
@@ -320,7 +320,7 @@ export default async function CoursePage({ params }: Props) {
 
       {/* Syllabus */}
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold">Syllabus</h2>
+        <h2 className="font-display text-xl font-semibold">Syllabus</h2>
         {course.syllabus ? (
           <p className="mt-2 whitespace-pre-line text-sm">{course.syllabus}</p>
         ) : (
@@ -331,7 +331,7 @@ export default async function CoursePage({ params }: Props) {
       {/* Roster (teacher/admin/CR) */}
       {canSeeRoster ? (
         <section className="mt-8">
-          <h2 className="font-display text-lg font-semibold">
+          <h2 className="font-display text-xl font-semibold">
             Roster ({roster.length}/{course.seatLimit})
           </h2>
           {roster.length === 0 ? (
@@ -369,7 +369,7 @@ export default async function CoursePage({ params }: Props) {
       {/* Management: manual enroll, edit course, assign teachers */}
       {canManage ? (
         <section className="mt-10 flex flex-col gap-6">
-          <h2 className="font-display text-lg font-semibold">Manage course</h2>
+          <h2 className="font-display text-xl font-semibold">Manage course</h2>
           <ManualEnrollForm courseId={course.id} />
           <CourseForm
             course={course}

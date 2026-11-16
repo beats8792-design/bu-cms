@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getServerSession } from "@/modules/auth/session";
 import { listSemesters } from "@/modules/academic/semesters";
 import { SemesterForm, WindowToggle } from "@/modules/academic/components/semester-form";
+import { Badge, EmptyState } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Semesters · Admin" };
 
@@ -23,7 +24,11 @@ export default async function AdminSemestersPage() {
       </div>
 
       {semesters.length === 0 ? (
-        <p className="mt-8 text-sm text-muted">No semesters yet — create one above.</p>
+        <div className="mt-8">
+          <EmptyState title="No semesters yet">
+            Create one with the form above.
+          </EmptyState>
+        </div>
       ) : (
         <div className="mt-6 flex flex-col gap-3">
           {semesters.map((s) => (
@@ -35,17 +40,13 @@ export default async function AdminSemestersPage() {
                 <span className="num ml-3 text-sm text-muted">
                   {s.startDate} → {s.endDate}
                 </span>
-                <span
-                  className={`ml-3 rounded-full px-2 py-0.5 text-xs font-medium ${
-                    s.enrollmentOpen ? "bg-primary-soft text-primary-hover" : "bg-warn-soft text-warn"
-                  }`}
-                >
+                <Badge tone={s.enrollmentOpen ? "info" : "warn"} className="ml-3">
                   {s.enrollmentOpen ? "window open" : "window closed"}
-                </span>
-                <span className="float-right">
-                  <WindowToggle semester={s} />
-                </span>
+                </Badge>
               </summary>
+              <div className="mt-3">
+                <WindowToggle semester={s} />
+              </div>
               <div className="mt-4">
                 <SemesterForm semester={s} />
               </div>

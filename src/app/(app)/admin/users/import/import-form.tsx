@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { importCsvAction, type AdminActionState } from "@/modules/admin/actions";
+import { Button, Notice } from "@/components/ui";
 
 const initial: AdminActionState = {};
 
@@ -10,16 +11,16 @@ export function ImportForm() {
 
   return (
     <div className="flex flex-col gap-4">
-      {state.error ? (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
-      ) : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
       {state.summary ? (
-        <div className="rounded-md border border-primary-soft bg-primary-soft px-3 py-2 text-sm text-primary-hover">
-          Imported <strong>{state.summary.imported}</strong> accounts
-          {state.summary.existing ? <> · {state.summary.existing} already existed</> : null}
-          {state.summary.duplicatesInFile ? <> · {state.summary.duplicatesInFile} duplicates skipped</> : null}
+        <>
+          <Notice tone="success">
+            Imported <strong>{state.summary.imported}</strong> accounts
+            {state.summary.existing ? <> · {state.summary.existing} already existed</> : null}
+            {state.summary.duplicatesInFile ? <> · {state.summary.duplicatesInFile} duplicates skipped</> : null}
+          </Notice>
           {state.summary.skipped.length ? (
-            <ul className="mt-2 list-inside list-disc text-xs">
+            <ul className="list-inside list-disc text-xs text-muted">
               {state.summary.skipped.slice(0, 5).map((s) => (
                 <li key={s.index}>Row {s.index}: {s.reason}</li>
               ))}
@@ -28,7 +29,7 @@ export function ImportForm() {
               ) : null}
             </ul>
           ) : null}
-        </div>
+        </>
       ) : null}
 
       <form action={formAction} className="flex flex-col gap-3">
@@ -39,16 +40,18 @@ export function ImportForm() {
             required
             rows={8}
             placeholder={"name,email,role,studentId\nAnisur Rahman,anis@versity.edu,student,2021-ESD-001"}
-            className="mt-1 w-full rounded-md border border-border px-3 py-2 font-mono text-xs"
+            className="mt-1 w-full rounded-lg border border-border px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </label>
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          className="self-start"
           disabled={pending}
-          className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
+          aria-busy={pending || undefined}
         >
           {pending ? "Importing…" : "Import"}
-        </button>
+        </Button>
       </form>
     </div>
   );

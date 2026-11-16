@@ -5,6 +5,7 @@ import { listCourses, countEnrolled, teacherNamesByIds } from "@/modules/academi
 import { listDepartments } from "@/modules/academic/departments";
 import { listSemesters } from "@/modules/academic/semesters";
 import { CourseForm } from "@/modules/academic/components/course-form";
+import { EmptyState, PageHeader } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Courses · Admin" };
 
@@ -24,17 +25,20 @@ export default async function AdminCoursesPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <h1 className="font-display text-2xl font-semibold">Courses</h1>
-      <p className="mt-1 text-sm text-muted">
+      <PageHeader title="Courses">
         Catalog across all semesters. Assign teachers via each course&apos;s detail page.
-      </p>
+      </PageHeader>
 
       <div className="mt-6">
         <CourseForm departments={departments} semesters={semesters} />
       </div>
 
       {courses.length === 0 ? (
-        <p className="mt-8 text-sm text-muted">No courses yet.</p>
+        <div className="mt-8">
+          <EmptyState title="No courses yet">
+            Create the first course with the form above once a semester and department exist.
+          </EmptyState>
+        </div>
       ) : (
         <table className="mt-6 w-full border-collapse text-sm">
           <caption className="sr-only">All courses</caption>

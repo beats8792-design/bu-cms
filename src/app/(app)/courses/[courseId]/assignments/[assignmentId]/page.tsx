@@ -107,7 +107,7 @@ export default async function AssignmentPage({ params }: Props) {
       {/* Student view: submit / status */}
       {isStudentish ? (
         <div className="mt-8">
-          <h2 className="font-display text-lg font-semibold">Your submission</h2>
+          <h2 className="font-display text-xl font-semibold">Your submission</h2>
           {myRow ? (
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
               <span className={`rounded-full px-3 py-1 text-xs font-medium ${STATUS_LABEL[myRow.score !== null ? "graded" : myRow.isLate ? "late" : "submitted"].cls}`}>
@@ -145,7 +145,7 @@ export default async function AssignmentPage({ params }: Props) {
       {dash ? (
         <div className="mt-10">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="font-display text-lg font-semibold">
+            <h2 className="font-display text-xl font-semibold">
               Grading dashboard ({dash.rows.length} students)
             </h2>
             <a
@@ -206,7 +206,7 @@ export default async function AssignmentPage({ params }: Props) {
       {/* Manage: edit + delete */}
       {canManage ? (
         <section className="mt-10 flex flex-col gap-4">
-          <h2 className="font-display text-lg font-semibold">Manage assignment</h2>
+          <h2 className="font-display text-xl font-semibold">Manage assignment</h2>
           <AssignmentForm courseId={courseId} assignment={assignment} />
           <div>
             <DeleteAssignmentButton assignmentId={assignmentId} courseId={courseId} />

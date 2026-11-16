@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { gradeAction, submitAssignmentAction, type AssignmentFormState } from "@/modules/assignments/actions";
 import { AssignmentFilePicker } from "@/modules/assignments/components/assignment-form";
 import type { Submission } from "@/modules/assignments/schema";
+import { Button, Notice, compactInputClass, inputClass } from "@/components/ui";
 
 /** Student submit/resubmit box (UCM-F11): files + note, versioned. */
 export function SubmissionForm({
@@ -19,14 +20,8 @@ export function SubmissionForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-      {state.error ? (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
-      ) : null}
-      {state.ok ? (
-        <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">
-          Submission saved.
-        </p>
-      ) : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Submission saved.</Notice> : null}
       <input type="hidden" name="assignmentId" value={assignmentId} />
       <input type="hidden" name="courseId" value={courseId} />
 
@@ -43,17 +38,18 @@ export function SubmissionForm({
           name="note"
           rows={2}
           defaultValue={existing?.note ?? ""}
-          className="mt-1 w-full rounded-md border border-border px-3 py-2"
+          className={inputClass}
         />
       </label>
 
-      <button
+      <Button
         type="submit"
         disabled={pending}
-        className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
+        aria-busy={pending || undefined}
+        className="self-start"
       >
         {pending ? "Submitting…" : existing ? "Resubmit" : "Submit"}
-      </button>
+      </Button>
     </form>
   );
 }
@@ -80,10 +76,8 @@ export function GradeForm({
 
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-2">
-      {state.error ? (
-        <p role="alert" className="w-full rounded-md bg-danger-soft px-2 py-1 text-xs text-danger">{state.error}</p>
-      ) : null}
-      {state.ok ? <p className="w-full text-xs text-primary-hover">Graded.</p> : null}
+      {state.error ? <Notice tone="danger" className="w-full">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success" className="w-full">Graded.</Notice> : null}
       <input type="hidden" name="assignmentId" value={assignmentId} />
       <input type="hidden" name="courseId" value={courseId} />
       <input type="hidden" name="userId" value={userId} />
@@ -97,7 +91,7 @@ export function GradeForm({
           max={points}
           step="0.5"
           defaultValue={score ?? ""}
-          className="num ml-1 w-20 rounded-md border border-border px-2 py-1"
+          className={`num ml-1 w-20 ${compactInputClass}`}
         />
       </label>
       <label className="text-xs font-medium">
@@ -107,16 +101,18 @@ export function GradeForm({
           name="feedback"
           defaultValue={feedback}
           placeholder="Optional feedback"
-          className="ml-1 w-48 rounded-md border border-border px-2 py-1"
+          className={`ml-1 w-48 ${compactInputClass}`}
         />
       </label>
-      <button
+      <Button
         type="submit"
+        variant="outline"
+        size="sm"
         disabled={pending}
-        className="rounded-md border border-primary px-3 py-1 text-xs font-medium text-primary hover:bg-primary-soft disabled:opacity-60"
+        aria-busy={pending || undefined}
       >
         {pending ? "Saving…" : "Save grade"}
-      </button>
+      </Button>
     </form>
   );
 }

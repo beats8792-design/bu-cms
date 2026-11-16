@@ -2,58 +2,39 @@
 
 import { useActionState } from "react";
 import type { FormState } from "@/modules/academic/actions";
+import { inputClass, Field, Button, Notice } from "@/components/ui";
 
 /**
- * Minimal form primitives following DESIGN.md §4/§5 (white cards, 1px border,
- * rounded-lg inputs, danger error text, 120–180ms transitions).
+ * Thin compatibility layer over the shared UI kit (src/components/ui) for
+ * the academic module's form-action pattern. New screens should import the
+ * kit directly; this file keeps older call sites working.
  */
 
-export function FormAlert({ state }: { state: FormState }) {
+export function FormAlert({ state, saved }: { state: FormState; saved?: string }) {
   if (state.error) {
-    return (
-      <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">
-        {state.error}
-      </p>
-    );
+    return <Notice tone="danger">{state.error}</Notice>;
   }
   if (state.ok) {
-    return (
-      <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Saved.</p>
-    );
+    return <Notice tone="success">{saved ?? "Saved."}</Notice>;
   }
   return null;
 }
 
-export const inputClass =
-  "mt-1 w-full rounded-md border border-border px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary";
+export { inputClass, Field };
 
-export function Field({
+export function SubmitButton({
+  pending,
   label,
-  children,
-  hint,
+  className,
 }: {
+  pending: boolean;
   label: string;
-  children: React.ReactNode;
-  hint?: string;
+  className?: string;
 }) {
   return (
-    <label className="text-sm font-medium">
-      {label}
-      {hint ? <span className="ml-1 font-normal text-muted">({hint})</span> : null}
-      {children}
-    </label>
-  );
-}
-
-export function SubmitButton({ pending, label }: { pending: boolean; label: string }) {
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-primary-hover disabled:opacity-60"
-    >
+    <Button type="submit" disabled={pending} aria-busy={pending || undefined} className={className}>
       {pending ? "Saving…" : label}
-    </button>
+    </Button>
   );
 }
 

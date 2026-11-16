@@ -8,7 +8,7 @@ export default function ImportPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <Link href="/admin/users" className="text-sm text-primary underline">
-        ← Back to users
+        Back to users
       </Link>
       <h1 className="mt-3 font-display text-2xl font-semibold">Bulk import accounts</h1>
       <p className="mt-2 text-sm text-muted">

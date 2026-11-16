@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateProfileAction, type ProfileState } from "@/modules/auth/actions";
+import { Button, Notice, inputClass } from "@/components/ui";
 
 export function ProfileForm({
   name,
@@ -18,35 +19,33 @@ export function ProfileForm({
 
   return (
     <form action={formAction} className="flex max-w-md flex-col gap-4">
-      {state.error ? (
-        <p role="alert" className="rounded-md bg-danger-soft px-3 py-2 text-sm text-danger">{state.error}</p>
-      ) : null}
-      {state.ok ? (
-        <p className="rounded-md bg-primary-soft px-3 py-2 text-sm text-primary-hover">Profile saved.</p>
-      ) : null}
+      {state.error ? <Notice tone="danger">{state.error}</Notice> : null}
+      {state.ok ? <Notice tone="success">Profile saved.</Notice> : null}
 
       <label className="text-sm font-medium">
         Full name
-        <input name="name" defaultValue={name} required minLength={2} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+        <input name="name" defaultValue={name} required minLength={2} className={inputClass} />
       </label>
       <label className="text-sm font-medium">
         Display name <span className="text-muted">(shown in class)</span>
-        <input name="displayName" defaultValue={displayName} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+        <input name="displayName" defaultValue={displayName} className={inputClass} />
       </label>
       {canEditStudentId ? (
         <label className="text-sm font-medium">
           Student ID
-          <input name="studentId" defaultValue={studentId} className="mt-1 w-full rounded-md border border-border px-3 py-2" />
+          <input name="studentId" defaultValue={studentId} className={inputClass} />
         </label>
       ) : null}
 
-      <button
+      <Button
         type="submit"
+        variant="primary"
+        className="self-start"
         disabled={pending}
-        className="self-start rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
+        aria-busy={pending || undefined}
       >
         {pending ? "Saving…" : "Save profile"}
-      </button>
+      </Button>
     </form>
   );
 }

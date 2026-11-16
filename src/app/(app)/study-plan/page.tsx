@@ -3,6 +3,7 @@ import { appGate } from "@/modules/auth/session";
 import { getPlan } from "@/modules/ai/planner";
 import { aiConfigured } from "@/modules/ai/gemini";
 import { PlanBoard, PlanGenerator } from "@/modules/ai/components/ai-forms";
+import { PageHeader, Notice } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Study plan · UCMS" };
 
@@ -16,8 +17,9 @@ export default async function StudyPlanPage() {
   if (user.role !== "student" && user.role !== "cr") {
     return (
       <div className="mx-auto max-w-6xl">
-        <h1 className="font-display text-2xl font-semibold">Study plan</h1>
-        <p className="mt-2 text-sm text-muted">The AI study planner is available to enrolled students and CRs.</p>
+        <PageHeader title="Study plan">
+          The AI study planner is available to enrolled students and CRs.
+        </PageHeader>
       </div>
     );
   }
@@ -26,16 +28,15 @@ export default async function StudyPlanPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <h1 className="font-display text-2xl font-semibold">My weekly study plan</h1>
-      <p className="mt-1 text-sm text-muted">
+      <PageHeader title="My weekly study plan">
         Built from your enrollments, upcoming deadlines, exam dates and recently covered topics. Tick items off as you
         go — regenerate whenever the week changes.
-      </p>
+      </PageHeader>
 
       {!aiConfigured() ? (
-        <p role="status" className="mt-4 rounded-md bg-warn-soft px-3 py-2 text-sm text-warn">
+        <Notice tone="warn" className="mt-4">
           AI features are not configured on this deployment yet.
-        </p>
+        </Notice>
       ) : null}
 
       <div className="mt-4">
