@@ -21,6 +21,9 @@ function createAuth() {
   return mongo.then(({ client, db }) =>
     betterAuth({
       database: mongodbAdapter(db, { client }),
+      // BetterAuth only auto-reads `BETTER_AUTH_SECRET`; wire up the app's
+      // BETTERAUTH_SECRET explicitly so deployments don't need both names.
+      secret: process.env.BETTERAUTH_SECRET,
       // BetterAuth's verify-email/reset links live under the API base path.
       baseURL: process.env.BETTERAUTH_URL
         ? `${process.env.BETTERAUTH_URL.replace(/\/$/, "")}/api/auth`
